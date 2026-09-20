@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoForge — Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Barlow:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: #050508;
+      color: #fff;
+      font-family: 'Barlow', 'Noto Sans SC', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ===== Video Hero ===== */
+    .video-hero {
+      position: relative;
+      height: 300vh; /* 3x viewport for scroll space */
+    }
+    .video-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .video-sticky video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(5,5,8,0.3) 0%,
+        rgba(5,5,8,0.5) 40%,
+        rgba(5,5,8,0.85) 100%);
+      z-index: 1;
+    }
+    .video-overlay::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 200px;
+      background: linear-gradient(to bottom, transparent, #050508);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 800px;
+      padding: 0 24px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 5px 5px 18px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 28px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease;
+    }
+    .hero-badge.show { opacity: 1; transform: translateY(0); }
+    .hero-badge span {
+      padding: 4px 12px;
+      background: #fff;
+      color: #000;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .hero-title {
+      font-family: 'Instrument Serif', 'Noto Sans SC', serif;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 0.9;
+      letter-spacing: -3px;
+      margin-bottom: 20px;
+    }
+    .hero-title .word {
+      display: inline-block;
+      opacity: 0;
+      filter: blur(12px);
+      transform: translateY(40px);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .hero-title .word.show {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+    .hero-sub {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.55);
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 550px;
+      margin: 0 auto 36px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease 0.6s;
+    }
+    .hero-sub.show { opacity: 1; transform: translateY(0); }
+    .hero-btns {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease 0.9s;
+    }
+    .hero-btns.show { opacity: 1; transform: translateY(0); }
+    .btn-glow {
+      padding: 14px 28px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-glow.primary {
+      background: linear-gradient(135deg, #087f7b, #0a9e99);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(8,127,123,0.35);
+    }
+    .btn-glow.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(8,127,123,0.5);
+    }
+    .btn-glow.ghost {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.9);
+    }
+    .btn-glow.ghost:hover { background: rgba(255,255,255,0.1); }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeInUp 1s ease 1.5s forwards;
+    }
+    .scroll-hint span {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .scroll-arrow {
+      width: 24px;
+      height: 24px;
+      border-right: 2px solid rgba(255,255,255,0.3);
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+      transform: rotate(45deg);
+      animation: scrollBounce 2s ease infinite;
+    }
+    @keyframes scrollBounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.3; }
+      50% { transform: rotate(45deg) translateY(8px); opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    /* Progress bar */
+    .scroll-progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #087f7b, #4dd9d5);
+      z-index: 100;
+      transition: width 0.1s linear;
+    }
+
+    /* ===== Parallax Sections ===== */
+    .parallax-section {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding: 80px 24px;
+    }
+    .parallax-bg {
+      position: absolute;
+      inset: -20%;
+      z-index: 0;
+      transition: transform 0.1s linear;
+    }
+    .parallax-bg-gradient {
+      width: 100%;
+      height: 100%;
+    }
+    .parallax-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Section: Features */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .feature-card {
+      padding: 28px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .feature-card.show { opacity: 1; transform: translateY(0); }
+    .feature-card:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(77,217,213,0.2);
+      transform: translateY(-4px) !important;
+    }
+    .feature-icon {
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 14px;
+      background: rgba(77,217,213,0.1);
+      border: 1px solid rgba(77,217,213,0.15);
+      font-size: 1.3rem;
+      margin-bottom: 18px;
+    }
+    .feature-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .feature-card p {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.5);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    /* Section: Split */
+    .split-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .split-text h2 {
+      font-family: 'Instrument Serif', 'Noto Sans SC', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 0.95;
+      letter-spacing: -1.5px;
+      margin-bottom: 16px;
+    }
+    .split-text p {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.5);
+      font-weight: 300;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .split-visual {
+      aspect-ratio: 4/3;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+      position: relative;
+    }
+    .split-visual canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Section: Stats */
+    .stats-section {
+      text-align: center;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .stat-card {
+      padding: 32px 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .stat-card.show { opacity: 1; transform: scale(1); }
+    .stat-value {
+      font-family: 'Instrument Serif', serif;
+      font-size: 2.8rem;
+      font-style: italic;
+      line-height: 1;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #fff, #4dd9d5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.45);
+      font-weight: 300;
+    }
+
+    /* Section badge */
+    .section-badge {
+      display: inline-flex;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+    .section-title {
+      font-family: 'Instrument Serif', 'Noto Sans SC', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 0.95;
+      letter-spacing: -2px;
+      margin-bottom: 14px;
+    }
+    .section-desc {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.45);
+      font-weight: 300;
+      max-width: 480px;
+    }
+
+    /* ===== Parallax floating orbs ===== */
+    .parallax-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== CTA Section ===== */
+    .cta-section {
+      text-align: center;
+      padding: 120px 24px;
+      position: relative;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(8,127,123,0.12), transparent);
+      pointer-events: none;
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+    .navbar.scrolled {
+      background: rgba(5,5,8,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .nav-logo {
+      font-family: 'Instrument Serif', serif;
+      font-size: 1.3rem;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .nav-logo span { color: #4dd9d5; }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #fff; }
+
+    /* Footer */
+    .footer {
+      padding: 32px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.3);
+    }
+    .footer a { color: rgba(255,255,255,0.4); transition: color 0.2s; }
+    .footer a:hover { color: #fff; }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .split-section { grid-template-columns: 1fr; gap: 30px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .hero-btns { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress Bar -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">Algo<span>Forge</span></div>
+    <div class="nav-links">
+      <a href="#">首页</a>
+      <a href="#">学习</a>
+      <a href="#">练习</a>
+      <a href="#">博客</a>
+    </div>
+  </nav>
+
+  <!-- ===== Video Hero with Scroll Control ===== -->
+  <section class="video-hero" id="videoHero">
+    <div class="video-sticky">
+      <video id="heroVideo" muted playsinline preload="auto" poster="">
+        <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4" type="video/mp4">
+      </video>
+      <div class="video-overlay"></div>
+
+      <div class="hero-content">
+        <div class="hero-badge" id="heroBadge">
+          <span>NEW</span> ICPC/CCPC 系统化训练平台
+        </div>
+        <h1 class="hero-title">
+          <span class="word" style="transition-delay:0.1s">竞赛算法</span>
+          <span class="word" style="transition-delay:0.25s">从零到</span>
+          <span class="word" style="transition-delay:0.4s">区域赛</span>
+        </h1>
+        <p class="hero-sub">系统化的学习路径、精选题库、可视化演示、AI 答疑。覆盖基础算法到高级数据结构，助你从容应对 ICPC/CCPC。</p>
+        <div class="hero-btns">
+          <a href="#" class="btn-glow primary">开始学习 →</a>
+          <a href="#" class="btn-glow ghost">▶ 观看介绍</a>
+        </div>
+      </div>
+
+      <div class="scroll-hint">
+        <span>向下滚动</span>
+        <div class="scroll-arrow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Features with Parallax ===== -->
+  <section class="parallax-section">
+    <div class="parallax-bg" data-speed="0.15">
+      <div class="parallax-bg-gradient" style="background: radial-gradient(ellipse 60% 50% at 30% 50%, rgba(8,127,123,0.1), transparent);"></div>
+    </div>
+    <div class="parallax-orb" style="width:400px;height:400px;top:10%;right:-5%;background:radial-gradient(circle,rgba(47,111,166,0.15),transparent);" data-speed="0.25"></div>
+    <div class="parallax-content">
+      <div class="section-badge">CAPABILITIES</div>
+      <h2 class="section-title">Pro features.<br>Zero complexity.</h2>
+      <p class="section-desc">从入门到区域赛，每一步都有清晰的路径和工具支撑。</p>
+
+      <div class="features-grid" style="margin-top:40px;">
+        <div class="feature-card" data-delay="0">
+          <div class="feature-icon">📚</div>
+          <h3>系统化学习路径</h3>
+          <p>从基础算法到高级数据结构，每个专题都有清晰的学习目标和步骤解析。</p>
+        </div>
+        <div class="feature-card" data-delay="0.1">
+          <div class="feature-icon">🎯</div>
+          <h3>可视化算法演示</h3>
+          <p>排序、二分、图遍历……抽象逻辑变成直观动画，看懂了再写代码。</p>
+        </div>
+        <div class="feature-card" data-delay="0.2">
+          <div class="feature-icon">💻</div>
+          <h3>在线 C++ 编辑器</h3>
+          <p>写代码、运行、看结果，一站式完成。无需配置本地环境。</p>
+        </div>
+        <div class="feature-card" data-delay="0.3">
+          <div class="feature-icon">📝</div>
+          <h3>精选题库</h3>
+          <p>洛谷、Codeforces、牛客全覆盖，每道题都有难度标签和解题提示。</p>
+        </div>
+        <div class="feature-card" data-delay="0.4">
+          <div class="feature-icon">🤖</div>
+          <h3>AI 算法助手</h3>
+          <p>遇到不懂的题目？DeepSeek 驱动的 AI 助教随时在线答疑。</p>
+        </div>
+        <div class="feature-card" data-delay="0.5">
+          <div class="feature-icon">🏆</div>
+          <h3>排行榜 & 打卡</h3>
+          <p>学习打卡日历、排行榜、错题本，保持动力不掉队。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Split Section with Parallax Visual ===== -->
+  <section class="parallax-section">
+    <div class="parallax-bg" data-speed="-0.1">
+      <div class="parallax-bg-gradient" style="background: radial-gradient(ellipse 50% 40% at 70% 50%, rgba(59,130,246,0.08), transparent);"></div>
+    </div>
+    <div class="parallax-orb" style="width:350px;height:350px;bottom:10%;left:-3%;background:radial-gradient(circle,rgba(77,217,213,0.12),transparent);" data-speed="0.2"></div>
+    <div class="parallax-content">
+      <div class="split-section">
+        <div class="split-text">
+          <div class="section-badge">VISUALIZATION</div>
+          <h2>看懂算法，<br>再写代码。</h2>
+          <p>10 种算法可视化，包括二分查找、冒泡排序、归并排序、Dijkstra、BFS、DFS。每一步都有中文解说，点击即可交互。</p>
+          <a href="#" class="btn-glow primary">体验可视化 →</a>
+        </div>
+        <div class="split-visual">
+          <canvas id="vizCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Stats with Parallax ===== -->
+  <section class="parallax-section stats-section">
+    <div class="parallax-bg" data-speed="0.08">
+      <div class="parallax-bg-gradient" style="background: radial-gradient(ellipse 60% 40% at 50% 50%, rgba(8,127,123,0.08), transparent);"></div>
+    </div>
+    <div class="parallax-content">
+      <div class="section-badge">METRICS</div>
+      <h2 class="section-title">数字说话</h2>
+      <div class="stats-grid">
+        <div class="stat-card" data-delay="0">
+          <div class="stat-value">47</div>
+          <div class="stat-label">算法课程</div>
+        </div>
+        <div class="stat-card" data-delay="0.1">
+          <div class="stat-value">200+</div>
+          <div class="stat-label">精选题目</div>
+        </div>
+        <div class="stat-card" data-delay="0.2">
+          <div class="stat-value">10</div>
+          <div class="stat-label">可视化算法</div>
+        </div>
+        <div class="stat-card" data-delay="0.3">
+          <div class="stat-value">∞</div>
+          <div class="stat-label">免费使用</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="cta-section">
+    <div class="section-badge">GET STARTED</div>
+    <h2 class="section-title">Your next AC<br>starts here.</h2>
+    <p class="section-desc" style="margin:0 auto 32px;">选择你的起点，开始系统化的竞赛训练。</p>
+    <div style="display:flex;justify-content:center;gap:14px;">
+      <a href="#" class="btn-glow primary">开始学习 →</a>
+      <a href="#" class="btn-glow ghost" style="background:#fff;color:#000;border:none;">进入题库</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>© 2025 AlgoForge</span>
+    <div style="display:flex;gap:20px;">
+      <a href="#">GitHub</a>
+      <a href="#">博客</a>
+      <a href="#">联系</a>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Scroll-controlled video =====
+    const video = document.getElementById('heroVideo');
+    const videoHero = document.getElementById('videoHero');
+    let videoReady = false;
+
+    video.addEventListener('loadedmetadata', () => {
+      videoReady = true;
+      video.currentTime = 0;
+    });
+
+    // Also try on canplay
+    video.addEventListener('canplay', () => {
+      if (!videoReady) {
+        videoReady = true;
+        video.currentTime = 0;
+      }
+    });
+
+    function updateVideoProgress() {
+      if (!videoReady) return;
+      const rect = videoHero.getBoundingClientRect();
+      const heroH = videoHero.offsetHeight;
+      const scrollY = -rect.top;
+      const scrollRange = heroH - window.innerHeight;
+      if (scrollRange <= 0) return;
+
+      const progress = Math.max(0, Math.min(1, scrollY / scrollRange));
+      const targetTime = progress * video.duration;
+
+      // Smooth seek
+      if (Math.abs(video.currentTime - targetTime) > 0.05) {
+        video.currentTime = targetTime;
+      }
+    }
+
+    // ===== Scroll progress bar =====
+    const progressBar = document.getElementById('scrollProgress');
+    function updateProgress() {
+      const scrollTop = window.scrollY;
+      const docH = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docH > 0 ? (scrollTop / docH) * 100 : 0;
+      progressBar.style.width = pct + '%';
+    }
+
+    // ===== Navbar scroll effect =====
+    const navbar = document.getElementById('navbar');
+    function updateNavbar() {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    }
+
+    // ===== Hero reveal =====
+    let heroRevealed = false;
+    function revealHero() {
+      if (heroRevealed) return;
+      heroRevealed = true;
+      document.getElementById('heroBadge').classList.add('show');
+      document.querySelectorAll('.hero-title .word').forEach((w, i) => {
+        setTimeout(() => w.classList.add('show'), i * 150 + 200);
+      });
+      document.querySelector('.hero-sub').classList.add('show');
+      document.querySelector('.hero-btns').classList.add('show');
+    }
+
+    // ===== Parallax =====
+    function updateParallax() {
+      document.querySelectorAll('[data-speed]').forEach(el => {
+        const speed = parseFloat(el.dataset.speed);
+        const rect = el.closest('.parallax-section, .video-hero').getBoundingClientRect();
+        const offset = rect.top * speed;
+        el.style.transform = `translateY(${offset}px)`;
+      });
+    }
+
+    // ===== Scroll reveal (IntersectionObserver) =====
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const delay = parseFloat(entry.target.dataset.delay || 0) * 1000;
+          setTimeout(() => entry.target.classList.add('show'), delay);
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.feature-card, .stat-card').forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    // ===== Scroll handler =====
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          updateVideoProgress();
+          updateProgress();
+          updateNavbar();
+          updateParallax();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    // Initial reveal
+    setTimeout(revealHero, 300);
+
+    // ===== Mini visualization in split section =====
+    (function() {
+      const canvas = document.getElementById('vizCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      function resize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const values = [42, 15, 73, 28, 56, 91, 34, 67, 48, 82];
+      const sorted = [...values].sort((a, b) => a - b);
+      let progress = 0;
+      let current = [...values];
+
+      function drawBars(arr, highlights) {
+        const w = canvas.width / dpr;
+        const h = canvas.height / dpr;
+        ctx.clearRect(0, 0, w, h);
+
+        const barW = Math.min(40, (w - 40) / arr.length - 8);
+        const gap = 8;
+        const maxVal = Math.max(...arr);
+        const startX = (w - (barW + gap) * arr.length + gap) / 2;
+
+        arr.forEach((v, i) => {
+          const barH = (v / maxVal) * (h - 60);
+          const x = startX + i * (barW + gap);
+          const y = h - 30 - barH;
+
+          let color = 'rgba(77,217,213,0.6)';
+          if (highlights && highlights.includes(i)) color = '#f97316';
+          if (highlights && highlights.sorted && highlights.sorted.includes(i)) color = '#22c55e';
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.roundRect(x, y, barW, barH, 4);
+          ctx.fill();
+
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          ctx.font = '11px Barlow';
+          ctx.textAlign = 'center';
+          ctx.fillText(v, x + barW / 2, y - 8);
+        });
+      }
+
+      // Animate bubble sort
+      let step = 0;
+      const steps = [];
+      const arr = [...values];
+      for (let i = 0; i < arr.length - 1; i++) {
+        for (let j = 0; j < arr.length - 1 - i; j++) {
+          if (arr[j] > arr[j + 1]) {
+            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            steps.push({ arr: [...arr], active: [j, j + 1] });
+          }
+        }
+        steps.push({ arr: [...arr], sorted: [arr.length - 1 - i] });
+      }
+      steps.push({ arr: [...arr], sorted: arr.map((_, i) => i) });
+
+      function animate() {
+        if (step < steps.length) {
+          drawBars(steps[step].arr, steps[step]);
+          step++;
+        } else {
+          step = 0;
+        }
+        setTimeout(animate, 400);
+      }
+
+      // Start when visible
+      const vizObserver = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          animate();
+          vizObserver.disconnect();
+        }
+      }, { threshold: 0.3 });
+      vizObserver.observe(canvas);
+    })();
+  </script>
+</body>
+</html>

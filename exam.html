@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlgoForge - AI 考试系统</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --exam-bg: #0f172a;
+      --exam-card: #1e293b;
+      --exam-border: #334155;
+      --exam-text: #e2e8f0;
+      --exam-muted: #94a3b8;
+      --exam-accent: #0ea5e9;
+      --exam-success: #22c55e;
+      --exam-warning: #f59e0b;
+      --exam-error: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--exam-bg);
+      color: var(--exam-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+    }
+
+    .exam-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    .exam-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--exam-border);
+      margin-bottom: 30px;
+    }
+
+    .exam-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .exam-logo img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .exam-logo h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--exam-accent), #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .exam-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .exam-nav-btn {
+      padding: 8px 16px;
+      background: var(--exam-card);
+      border: 1px solid var(--exam-border);
+      border-radius: 8px;
+      color: var(--exam-text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .exam-nav-btn:hover, .exam-nav-btn.active {
+      background: var(--exam-accent);
+      border-color: var(--exam-accent);
+      color: #fff;
+    }
+
+    /* Main Content */
+    .exam-main {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+      min-height: calc(100vh - 120px);
+    }
+
+    /* Sidebar */
+    .exam-sidebar {
+      background: var(--exam-card);
+      border: 1px solid var(--exam-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--exam-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .scenario-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .scenario-item {
+      padding: 12px;
+      background: var(--exam-bg);
+      border: 1px solid var(--exam-border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .scenario-item:hover, .scenario-item.active {
+      border-color: var(--exam-accent);
+      background: rgba(14, 165, 233, 0.1);
+    }
+
+    .scenario-item h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .scenario-item p {
+      font-size: 0.8rem;
+      color: var(--exam-muted);
+    }
+
+    .scenario-meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .meta-tag {
+      padding: 2px 8px;
+      background: rgba(14, 165, 233, 0.2);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: var(--exam-accent);
+    }
+
+    /* Content Area */
+    .exam-content {
+      background: var(--exam-card);
+      border: 1px solid var(--exam-border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    /* Steps Indicator */
+    .steps-indicator {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--exam-border);
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--exam-border);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .step.active .step-number {
+      background: var(--exam-accent);
+      color: #fff;
+    }
+
+    .step.completed .step-number {
+      background: var(--exam-success);
+      color: #fff;
+    }
+
+    .step-label {
+      font-size: 0.85rem;
+      color: var(--exam-muted);
+    }
+
+    .step.active .step-label {
+      color: var(--exam-text);
+      font-weight: 600;
+    }
+
+    .step-connector {
+      flex: 1;
+      height: 2px;
+      background: var(--exam-border);
+    }
+
+    .step.completed + .step-connector {
+      background: var(--exam-success);
+    }
+
+    /* Step Content */
+    .step-content {
+      display: none;
+    }
+
+    .step-content.active {
+      display: block;
+    }
+
+    /* Generate Step */
+    .generate-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .form-group select, .form-group input, .form-group textarea {
+      padding: 10px 14px;
+      background: var(--exam-bg);
+      border: 1px solid var(--exam-border);
+      border-radius: 8px;
+      color: var(--exam-text);
+      font-size: 0.9rem;
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Preview */
+    .exam-preview {
+      background: var(--exam-bg);
+      border: 1px solid var(--exam-border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .preview-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .preview-badge {
+      padding: 4px 12px;
+      background: var(--exam-accent);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .question-preview {
+      padding: 16px;
+      background: var(--exam-card);
+      border: 1px solid var(--exam-border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .question-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .question-type {
+      padding: 2px 8px;
+      background: var(--exam-accent);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .question-score {
+      margin-left: auto;
+      font-size: 0.85rem;
+      color: var(--exam-muted);
+    }
+
+    .question-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Upload Step */
+    .upload-area {
+      border: 2px dashed var(--exam-border);
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-area:hover {
+      border-color: var(--exam-accent);
+      background: rgba(14, 165, 233, 0.05);
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .upload-text {
+      font-size: 1rem;
+      color: var(--exam-muted);
+      margin-bottom: 8px;
+    }
+
+    .upload-hint {
+      font-size: 0.85rem;
+      color: var(--exam-muted);
+    }
+
+    .uploaded-files {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--exam-bg);
+      border: 1px solid var(--exam-border);
+      border-radius: 8px;
+    }
+
+    .file-icon {
+      font-size: 1.5rem;
+    }
+
+    .file-info {
+      flex: 1;
+    }
+
+    .file-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .file-size {
+      font-size: 0.8rem;
+      color: var(--exam-muted);
+    }
+
+    .file-status {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .file-status.success {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--exam-success);
+    }
+
+    .file-status.processing {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--exam-warning);
+    }
+
+    /* Grade Step */
+    .grade-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card {
+      padding: 20px;
+      background: var(--exam-bg);
+      border: 1px solid var(--exam-border);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .summary-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--exam-accent);
+      margin-bottom: 4px;
+    }
+
+    .summary-label {
+      font-size: 0.85rem;
+      color: var(--exam-muted);
+    }
+
+    .grade-details {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .grade-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--exam-bg);
+      border: 1px solid var(--exam-border);
+      border-radius: 8px;
+    }
+
+    .grade-icon {
+      font-size: 1.5rem;
+    }
+
+    .grade-info {
+      flex: 1;
+    }
+
+    .grade-question {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .grade-feedback {
+      font-size: 0.85rem;
+      color: var(--exam-muted);
+    }
+
+    .grade-score {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .grade-score.correct {
+      color: var(--exam-success);
+    }
+
+    .grade-score.partial {
+      color: var(--exam-warning);
+    }
+
+    .grade-score.wrong {
+      color: var(--exam-error);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--exam-accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #0284c7;
+    }
+
+    .btn-secondary {
+      background: var(--exam-card);
+      border: 1px solid var(--exam-border);
+      color: var(--exam-text);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--exam-accent);
+    }
+
+    .btn-success {
+      background: var(--exam-success);
+      color: #fff;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--exam-border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--exam-accent), #38bdf8);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--exam-border);
+      border-top-color: var(--exam-accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .exam-main {
+        grid-template-columns: 1fr;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .grade-summary {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="exam-container">
+    <!-- Header -->
+    <header class="exam-header">
+      <div class="exam-logo">
+        <h1>AlgoForge AI 考试系统</h1>
+      </div>
+      <nav class="exam-nav">
+        <button class="exam-nav-btn active" onclick="showSection('generate')">生成试卷</button>
+        <button class="exam-nav-btn" onclick="showSection('history')">历史记录</button>
+        <button class="exam-nav-btn" onclick="window.location.href='index.html'">返回首页</button>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="exam-main">
+      <!-- Sidebar -->
+      <aside class="exam-sidebar">
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">场景脚本</h3>
+          <div class="scenario-list" id="scenarioList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">工具状态</h3>
+          <div id="toolStatus">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="color: var(--exam-success);">●</span>
+              <span style="font-size: 0.85rem;">PDF 生成器</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="color: var(--exam-success);">●</span>
+              <span style="font-size: 0.85rem;">PDF 读取器</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="color: var(--exam-success);">●</span>
+              <span style="font-size: 0.85rem;">图片识别</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: var(--exam-success);">●</span>
+              <span style="font-size: 0.85rem;">AI 批改</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <main class="exam-content">
+        <!-- Steps Indicator -->
+        <div class="steps-indicator">
+          <div class="step active" data-step="1">
+            <span class="step-number">1</span>
+            <span class="step-label">生成试卷</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step" data-step="2">
+            <span class="step-number">2</span>
+            <span class="step-label">PDF 输出</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step" data-step="3">
+            <span class="step-number">3</span>
+            <span class="step-label">上传答卷</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step" data-step="4">
+            <span class="step-number">4</span>
+            <span class="step-label">AI 推理</span>
+          </div>
+          <div class="step-connector"></div>
+          <div class="step" data-step="5">
+            <span class="step-number">5</span>
+            <span class="step-label">输出结果</span>
+          </div>
+        </div>
+
+        <!-- Step 1: Generate -->
+        <div class="step-content active" id="step1">
+          <h2 style="margin-bottom: 20px;">生成考试试卷</h2>
+          <div class="generate-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>选择场景</label>
+                <select id="scenarioSelect">
+                  <option value="algorithm_basics">算法基础考试</option>
+                  <option value="data_structures">数据结构考试</option>
+                  <option value="custom">自定义考试</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>难度分布</label>
+                <select id="difficultySelect">
+                  <option value="balanced">均衡分布</option>
+                  <option value="easy">偏简单</option>
+                  <option value="hard">偏困难</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>考试时长（分钟）</label>
+                <input type="number" id="durationInput" value="120" min="30" max="300" />
+              </div>
+              <div class="form-group">
+                <label>总分</label>
+                <input type="number" id="totalScoreInput" value="100" min="50" max="200" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>考试标题</label>
+              <input type="text" id="examTitleInput" value="算法基础能力测试" />
+            </div>
+
+            <div class="form-group">
+              <label>题目要求（可选）</label>
+              <textarea id="requirementsInput" placeholder="输入特殊要求，如：侧重动态规划、包含代码题等"></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateExam()" style="width: 100%;">
+              生成试卷
+            </button>
+          </div>
+
+          <!-- Preview -->
+          <div class="exam-preview" id="examPreview" style="display: none;">
+            <div class="preview-header">
+              <h3 class="preview-title" id="previewTitle">试卷预览</h3>
+              <span class="preview-badge" id="previewBadge">0 题</span>
+            </div>
+            <div id="previewQuestions">
+              <!-- Dynamically populated -->
+            </div>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="goToStep(2)">下一步：生成 PDF</button>
+              <button class="btn btn-secondary" onclick="regenerateExam()">重新生成</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: PDF Output -->
+        <div class="step-content" id="step2">
+          <h2 style="margin-bottom: 20px;">PDF 输出</h2>
+          <div style="text-align: center; padding: 40px;">
+            <div class="spinner" style="margin: 0 auto 16px;" id="pdfSpinner"></div>
+            <p id="pdfStatus">正在生成 PDF...</p>
+            <div class="progress-bar" style="max-width: 400px; margin: 16px auto;">
+              <div class="progress-fill" id="pdfProgress" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div id="pdfResult" style="display: none;">
+            <div style="text-align: center; padding: 20px;">
+              <div style="font-size: 3rem; margin-bottom: 16px;">📄</div>
+              <h3 style="margin-bottom: 8px;">PDF 生成成功</h3>
+              <p style="color: var(--exam-muted); margin-bottom: 20px;" id="pdfFilename">exam_paper.pdf</p>
+              <div class="btn-group" style="justify-content: center;">
+                <button class="btn btn-primary" onclick="downloadPDF()">下载 PDF</button>
+                <button class="btn btn-secondary" onclick="previewPDF()">预览 PDF</button>
+                <button class="btn btn-success" onclick="goToStep(3)">下一步：上传答卷</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Upload -->
+        <div class="step-content" id="step3">
+          <h2 style="margin-bottom: 20px;">上传答卷</h2>
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📤</div>
+            <p class="upload-text">点击或拖拽上传答卷</p>
+            <p class="upload-hint">支持 PDF、JPG、PNG 格式，最大 10MB</p>
+            <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" multiple style="display: none;" onchange="handleFileUpload(event)" />
+          </div>
+
+          <div class="uploaded-files" id="uploadedFiles">
+            <!-- Dynamically populated -->
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="goToStep(4)" id="processBtn" disabled>下一步：AI 推理</button>
+            <button class="btn btn-secondary" onclick="goToStep(2)">上一步</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Inference -->
+        <div class="step-content" id="step4">
+          <h2 style="margin-bottom: 20px;">AI 推理</h2>
+          <div style="text-align: center; padding: 40px;">
+            <div class="spinner" style="margin: 0 auto 16px;" id="inferenceSpinner"></div>
+            <p id="inferenceStatus">正在分析答卷...</p>
+            <div class="progress-bar" style="max-width: 400px; margin: 16px auto;">
+              <div class="progress-fill" id="inferenceProgress" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div id="inferenceResult" style="display: none;">
+            <div style="text-align: center; padding: 20px;">
+              <div style="font-size: 3rem; margin-bottom: 16px;">✅</div>
+              <h3 style="margin-bottom: 8px;">分析完成</h3>
+              <p style="color: var(--exam-muted); margin-bottom: 20px;">已成功分析所有答卷</p>
+              <button class="btn btn-success" onclick="goToStep(5)">查看结果</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: Results -->
+        <div class="step-content" id="step5">
+          <h2 style="margin-bottom: 20px;">批改结果</h2>
+
+          <div class="grade-summary">
+            <div class="summary-card">
+              <div class="summary-value" id="totalScoreDisplay">85</div>
+              <div class="summary-label">总分</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="correctRateDisplay">85%</div>
+              <div class="summary-label">正确率</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value" id="gradeDisplay">B+</div>
+              <div class="summary-label">等级</div>
+            </div>
+          </div>
+
+          <div class="grade-details" id="gradeDetails">
+            <!-- Dynamically populated -->
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="downloadReport()">下载报告</button>
+            <button class="btn btn-secondary" onclick="resetExam()">开始新考试</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- PDF.js for reading PDFs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- jsPDF for generating PDFs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- html2canvas for PDF rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    // ===== State Management =====
+    const state = {
+      currentStep: 1,
+      selectedScenario: null,
+      examData: null,
+      pdfData: null,
+      uploadedFiles: [],
+      gradeResult: null
+    };
+
+    // ===== Scenario Data =====
+    const scenarios = {
+      algorithm_basics: {
+        id: 'algorithm_basics',
+        name: '算法基础考试',
+        description: 'ICPC/CCPC 算法基础测试',
+        duration: 120,
+        totalScore: 100,
+        sections: [
+          {
+            name: '选择题',
+            type: 'choice',
+            count: 6,
+            score: 5,
+            questions: [
+              {
+                id: 'q1',
+                text: '以下哪种排序算法的平均时间复杂度为 O(n log n)？',
+                options: ['冒泡排序', '选择排序', '归并排序', '插入排序'],
+                answer: 2,
+                difficulty: 'easy'
+              },
+              {
+                id: 'q2',
+                text: '二分查找算法要求数据必须是？',
+                options: ['无序的', '有序的', '链表存储', '树形结构'],
+                answer: 1,
+                difficulty: 'easy'
+              },
+              {
+                id: 'q3',
+                text: '以下哪种数据结构适用于实现 LRU 缓存？',
+                options: ['栈', '队列', '哈希表+双向链表', '二叉堆'],
+                answer: 2,
+                difficulty: 'medium'
+              },
+              {
+                id: 'q4',
+                text: 'Dijkstra 算法不能处理哪种边？',
+                options: ['有向边', '无向边', '负权边', '重边'],
+                answer: 2,
+                difficulty: 'medium'
+              },
+              {
+                id: 'q5',
+                text: '动态规划的核心思想是？',
+                options: ['分治法', '贪心法', '记忆化搜索', '最优子结构'],
+                answer: 3,
+                difficulty: 'medium'
+              },
+              {
+                id: 'q6',
+                text: '以下哪种遍历方式可以得到二叉搜索树的有序序列？',
+                options: ['前序遍历', '中序遍历', '后序遍历', '层序遍历'],
+                answer: 1,
+                difficulty: 'hard'
+              }
+            ]
+          },
+          {
+            name: '填空题',
+            type: 'fill',
+            count: 4,
+            score: 5,
+            questions: [
+              {
+                id: 'q7',
+                text: '快速排序的平均时间复杂度是 ______。',
+                answer: 'O(n log n)',
+                difficulty: 'easy'
+              },
+              {
+                id: 'q8',
+                text: '深度优先搜索使用 ______ 数据结构来实现。',
+                answer: '栈',
+                difficulty: 'medium'
+              },
+              {
+                id: 'q9',
+                text: '最小生成树的经典算法有 Prim 和 ______。',
+                answer: 'Kruskal',
+                difficulty: 'medium'
+              },
+              {
+                id: 'q10',
+                text: '并查集的两个核心操作是 ______ 和合并。',
+                answer: '查找',
+                difficulty: 'hard'
+              }
+            ]
+          },
+          {
+            name: '编程题',
+            type: 'code',
+            count: 3,
+            score: 10,
+            questions: [
+              {
+                id: 'q11',
+                text: '实现一个函数，判断一个数是否为素数。',
+                answer: 'function isPrime(n) { if (n < 2) return false; for (let i = 2; i * i <= n; i++) { if (n % i === 0) return false; } return true; }',
+                difficulty: 'easy'
+              },
+              {
+                id: 'q12',
+                text: '实现二分查找算法，在有序数组中查找目标值。',
+                answer: 'function binarySearch(arr, target) { let left = 0, right = arr.length - 1; while (left <= right) { let mid = Math.floor((left + right) / 2); if (arr[mid] === target) return mid; else if (arr[mid] < target) left = mid + 1; else right = mid - 1; } return -1; }',
+                difficulty: 'medium'
+              },
+              {
+                id: 'q13',
+                text: '实现一个函数，计算斐波那契数列的第 n 项（使用动态规划）。',
+                answer: 'function fibonacci(n) { if (n <= 1) return n; let dp = [0, 1]; for (let i = 2; i <= n; i++) { dp[i] = dp[i-1] + dp[i-2]; } return dp[n]; }',
+                difficulty: 'hard'
+              }
+            ]
+          }
+        ]
+      },
+      data_structures: {
+        id: 'data_structures',
+        name: '数据结构考试',
+        description: '数据结构专项测试',
+        duration: 90,
+        totalScore: 100,
+        sections: [
+          {
+            name: '概念题',
+            type: 'choice',
+            count: 4,
+            score: 5,
+            questions: [
+              {
+                id: 'ds1',
+                text: '栈的特点是？',
+                options: ['先进先出', '先进后出', '随机访问', '有序存储'],
+                answer: 1,
+                difficulty: 'easy'
+              },
+              {
+                id: 'ds2',
+                text: '以下哪种树是平衡二叉树？',
+                options: ['二叉搜索树', 'AVL树', '完全二叉树', '满二叉树'],
+                answer: 1,
+                difficulty: 'easy'
+              },
+              {
+                id: 'ds3',
+                text: '哈希表的平均查找时间复杂度是？',
+                options: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'],
+                answer: 0,
+                difficulty: 'medium'
+              },
+              {
+                id: 'ds4',
+                text: '线段树主要用于解决什么问题？',
+                options: ['排序', '区间查询', '最短路径', '字符串匹配'],
+                answer: 1,
+                difficulty: 'medium'
+              }
+            ]
+          },
+          {
+            name: '操作题',
+            type: 'code',
+            count: 3,
+            score: 10,
+            questions: [
+              {
+                id: 'ds5',
+                text: '实现一个栈，支持 push、pop、top 操作。',
+                answer: 'class Stack { constructor() { this.items = []; } push(item) { this.items.push(item); } pop() { return this.items.pop(); } top() { return this.items[this.items.length - 1]; } }',
+                difficulty: 'easy'
+              },
+              {
+                id: 'ds6',
+                text: '实现一个队列，支持 enqueue、dequeue 操作。',
+                answer: 'class Queue { constructor() { this.items = []; } enqueue(item) { this.items.push(item); } dequeue() { return this.items.shift(); } }',
+                difficulty: 'medium'
+              },
+              {
+                id: 'ds7',
+                text: '实现一个简单的哈希表，支持插入和查找。',
+                answer: 'class HashTable { constructor(size) { this.size = size; this.table = new Array(size); } hash(key) { let hash = 0; for (let i = 0; i < key.length; i++) { hash += key.charCodeAt(i); } return hash % this.size; } set(key, value) { let index = this.hash(key); this.table[index] = value; } get(key) { let index = this.hash(key); return this.table[index]; } }',
+                difficulty: 'hard'
+              }
+            ]
+          }
+        ]
+      }
+    };
+
+    // ===== Initialize =====
+    function init() {
+      renderScenarioList();
+      selectScenario('algorithm_basics');
+    }
+
+    // ===== Render Scenario List =====
+    function renderScenarioList() {
+      const list = document.getElementById('scenarioList');
+      list.innerHTML = Object.values(scenarios).map(s => `
+        <div class="scenario-item ${state.selectedScenario === s.id ? 'active' : ''}" onclick="selectScenario('${s.id}')">
+          <h4>${s.name}</h4>
+          <p>${s.description}</p>
+          <div class="scenario-meta">
+            <span class="meta-tag">${s.duration}分钟</span>
+            <span class="meta-tag">${s.totalScore}分</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ===== Select Scenario =====
+    function selectScenario(id) {
+      state.selectedScenario = id;
+      const scenario = scenarios[id];
+      if (scenario) {
+        document.getElementById('scenarioSelect').value = id;
+        document.getElementById('durationInput').value = scenario.duration;
+        document.getElementById('totalScoreInput').value = scenario.totalScore;
+        document.getElementById('examTitleInput').value = scenario.name;
+      }
+      renderScenarioList();
+    }
+
+    // ===== Generate Exam =====
+    function generateExam() {
+      const scenarioId = document.getElementById('scenarioSelect').value;
+      const scenario = scenarios[scenarioId];
+      if (!scenario) return;
+
+      state.examData = {
+        id: 'exam_' + Date.now(),
+        title: document.getElementById('examTitleInput').value,
+        duration: parseInt(document.getElementById('durationInput').value),
+        totalScore: parseInt(document.getElementById('totalScoreInput').value),
+        generatedAt: new Date().toISOString(),
+        sections: scenario.sections
+      };
+
+      renderExamPreview();
+    }
+
+    // ===== Render Exam Preview =====
+    function renderExamPreview() {
+      const preview = document.getElementById('examPreview');
+      const previewTitle = document.getElementById('previewTitle');
+      const previewBadge = document.getElementById('previewBadge');
+      const previewQuestions = document.getElementById('previewQuestions');
+
+      preview.style.display = 'block';
+      previewTitle.textContent = state.examData.title;
+
+      let totalQuestions = 0;
+      state.examData.sections.forEach(s => {
+        totalQuestions += s.questions.length;
+      });
+      previewBadge.textContent = `${totalQuestions} 题`;
+
+      previewQuestions.innerHTML = state.examData.sections.map(section => `
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin-bottom: 12px; color: var(--exam-accent);">${section.name} (${section.questions.length} 题，每题 ${section.score} 分)</h4>
+          ${section.questions.map((q, i) => `
+            <div class="question-preview">
+              <div class="question-header">
+                <span class="question-type">${section.type === 'choice' ? '选择' : section.type === 'fill' ? '填空' : '编程'}</span>
+                <span class="question-score">${section.score} 分</span>
+              </div>
+              <div class="question-text">${i + 1}. ${q.text}</div>
+              ${q.options ? `<div style="margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 0.85rem; color: var(--exam-muted);">
+                ${q.options.map((opt, j) => `<div>${String.fromCharCode(65 + j)}. ${opt}</div>`).join('')}
+              </div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    // ===== Regenerate Exam =====
+    function regenerateExam() {
+      generateExam();
+    }
+
+    // ===== Go To Step =====
+    function goToStep(step) {
+      // Update state
+      state.currentStep = step;
+
+      // Update step indicators
+      document.querySelectorAll('.step').forEach(s => {
+        const stepNum = parseInt(s.dataset.step);
+        s.classList.remove('active', 'completed');
+        if (stepNum === step) s.classList.add('active');
+        else if (stepNum < step) s.classList.add('completed');
+      });
+
+      // Update step content
+      document.querySelectorAll('.step-content').forEach(c => {
+        c.classList.remove('active');
+      });
+      document.getElementById(`step${step}`).classList.add('active');
+
+      // Handle step-specific logic
+      if (step === 2) {
+        generatePDF();
+      } else if (step === 4) {
+        runInference();
+      } else if (step === 5) {
+        showResults();
+      }
+    }
+
+    // ===== Generate PDF =====
+    function generatePDF() {
+      const spinner = document.getElementById('pdfSpinner');
+      const status = document.getElementById('pdfStatus');
+      const progress = document.getElementById('pdfProgress');
+      const result = document.getElementById('pdfResult');
+
+      spinner.style.display = 'block';
+      status.textContent = '正在生成 PDF...';
+      progress.style.width = '0%';
+      result.style.display = 'none';
+
+      // Simulate PDF generation progress
+      let percent = 0;
+      const interval = setInterval(() => {
+        percent += 10;
+        progress.style.width = `${percent}%`;
+        if (percent >= 100) {
+          clearInterval(interval);
+          spinner.style.display = 'none';
+          status.textContent = 'PDF 生成完成！';
+          result.style.display = 'block';
+
+          // Generate actual PDF using jsPDF
+          try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Add title
+            doc.setFontSize(20);
+            doc.text(state.examData.title, 105, 20, { align: 'center' });
+
+            doc.setFontSize(12);
+            doc.text(`时长: ${state.examData.duration} 分钟 | 总分: ${state.examData.totalScore} 分`, 105, 30, { align: 'center' });
+
+            let y = 45;
+
+            // Add sections
+            state.examData.sections.forEach((section, si) => {
+              doc.setFontSize(14);
+              doc.setFont(undefined, 'bold');
+              doc.text(`${si + 1}. ${section.name} (${section.questions.length} 题，每题 ${section.score} 分)`, 20, y);
+              y += 10;
+
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(11);
+
+              section.questions.forEach((q, qi) => {
+                if (y > 270) {
+                  doc.addPage();
+                  y = 20;
+                }
+
+                doc.text(`${qi + 1}. ${q.text}`, 20, y);
+                y += 7;
+
+                if (q.options) {
+                  q.options.forEach((opt, oi) => {
+                    doc.text(`   ${String.fromCharCode(65 + oi)}. ${opt}`, 25, y);
+                    y += 6;
+                  });
+                }
+                y += 5;
+              });
+
+              y += 10;
+            });
+
+            // Store PDF data
+            state.pdfData = doc.output('datauristring');
+            document.getElementById('pdfFilename').textContent = `${state.examData.id}.pdf`;
+          } catch (e) {
+            console.error('PDF generation error:', e);
+            // Fallback: create a simple text-based PDF
+            state.pdfData = 'data:text/plain;base64,' + btoa(JSON.stringify(state.examData, null, 2));
+          }
+        }
+      }, 200);
+    }
+
+    // ===== Download PDF =====
+    function downloadPDF() {
+      if (!state.pdfData) return;
+
+      const link = document.createElement('a');
+      link.href = state.pdfData;
+      link.download = `${state.examData.id}.pdf`;
+      link.click();
+    }
+
+    // ===== Preview PDF =====
+    function previewPDF() {
+      if (!state.pdfData) return;
+      window.open(state.pdfData, '_blank');
+    }
+
+    // ===== Handle File Upload =====
+    function handleFileUpload(event) {
+      const files = event.target.files;
+      if (!files.length) return;
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const fileData = {
+            id: 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            data: e.target.result,
+            status: 'uploaded'
+          };
+
+          state.uploadedFiles.push(fileData);
+          renderUploadedFiles();
+
+          // Enable process button if files uploaded
+          if (state.uploadedFiles.length > 0) {
+            document.getElementById('processBtn').disabled = false;
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ===== Render Uploaded Files =====
+    function renderUploadedFiles() {
+      const container = document.getElementById('uploadedFiles');
+      container.innerHTML = state.uploadedFiles.map(file => `
+        <div class="file-item">
+          <span class="file-icon">${file.type.includes('pdf') ? '📄' : '🖼️'}</span>
+          <div class="file-info">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${(file.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <span class="file-status ${file.status === 'processed' ? 'success' : 'processing'}">
+            ${file.status === 'processed' ? '已处理' : '待处理'}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    // ===== Run Inference =====
+    function runInference() {
+      const spinner = document.getElementById('inferenceSpinner');
+      const status = document.getElementById('inferenceStatus');
+      const progress = document.getElementById('inferenceProgress');
+      const result = document.getElementById('inferenceResult');
+
+      spinner.style.display = 'block';
+      status.textContent = '正在分析答卷...';
+      progress.style.width = '0%';
+      result.style.display = 'none';
+
+      // Simulate inference progress
+      let percent = 0;
+      const interval = setInterval(() => {
+        percent += 5;
+        progress.style.width = `${percent}%`;
+        status.textContent = `正在分析答卷... ${percent}%`;
+
+        if (percent >= 100) {
+          clearInterval(interval);
+          spinner.style.display = 'none';
+          status.textContent = '分析完成！';
+          result.style.display = 'block';
+
+          // Mark files as processed
+          state.uploadedFiles.forEach(f => f.status = 'processed');
+          renderUploadedFiles();
+
+          // Generate mock grade result
+          generateMockGrade();
+        }
+      }, 150);
+    }
+
+    // ===== Generate Mock Grade =====
+    function generateMockGrade() {
+      if (!state.examData) return;
+
+      let totalScore = 0;
+      let maxScore = 0;
+      const details = [];
+
+      state.examData.sections.forEach(section => {
+        section.questions.forEach(q => {
+          maxScore += section.score;
+          const isCorrect = Math.random() > 0.3;
+          const score = isCorrect ? section.score : Math.floor(section.score * Math.random());
+          totalScore += score;
+
+          details.push({
+            questionId: q.id,
+            questionText: q.text.substring(0, 50) + '...',
+            score: score,
+            maxScore: section.score,
+            correct: isCorrect,
+            feedback: isCorrect ? '回答正确！' : '部分正确，需要复习相关知识点。'
+          });
+        });
+      });
+
+      const percentage = Math.round((totalScore / maxScore) * 100);
+      let grade = 'F';
+      if (percentage >= 90) grade = 'A';
+      else if (percentage >= 80) grade = 'B';
+      else if (percentage >= 70) grade = 'C';
+      else if (percentage >= 60) grade = 'D';
+
+      state.gradeResult = {
+        totalScore: totalScore,
+        maxScore: maxScore,
+        percentage: percentage,
+        grade: grade,
+        details: details
+      };
+    }
+
+    // ===== Show Results =====
+    function showResults() {
+      if (!state.gradeResult) return;
+
+      document.getElementById('totalScoreDisplay').textContent = state.gradeResult.totalScore;
+      document.getElementById('correctRateDisplay').textContent = `${state.gradeResult.percentage}%`;
+      document.getElementById('gradeDisplay').textContent = state.gradeResult.grade;
+
+      const details = document.getElementById('gradeDetails');
+      details.innerHTML = state.gradeResult.details.map(d => `
+        <div class="grade-item">
+          <span class="grade-icon">${d.correct ? '✅' : '❌'}</span>
+          <div class="grade-info">
+            <div class="grade-question">${d.questionId}: ${d.questionText}</div>
+            <div class="grade-feedback">${d.feedback}</div>
+          </div>
+          <span class="grade-score ${d.correct ? 'correct' : d.score > 0 ? 'partial' : 'wrong'}">
+            ${d.score}/${d.maxScore}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    // ===== Download Report =====
+    function downloadReport() {
+      if (!state.gradeResult) return;
+
+      const report = {
+        examId: state.examData.id,
+        title: state.examData.title,
+        generatedAt: new Date().toISOString(),
+        result: state.gradeResult
+      };
+
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `exam_report_${state.examData.id}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== Reset Exam =====
+    function resetExam() {
+      state.currentStep = 1;
+      state.examData = null;
+      state.pdfData = null;
+      state.uploadedFiles = [];
+      state.gradeResult = null;
+
+      document.getElementById('examPreview').style.display = 'none';
+      document.getElementById('pdfResult').style.display = 'none';
+      document.getElementById('inferenceResult').style.display = 'none';
+      document.getElementById('uploadedFiles').innerHTML = '';
+      document.getElementById('processBtn').disabled = true;
+
+      goToStep(1);
+    }
+
+    // ===== Show Section =====
+    function showSection(section) {
+      // Update nav buttons
+      document.querySelectorAll('.exam-nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Handle section visibility (for now, just reset to generate)
+      if (section === 'generate') {
+        resetExam();
+      } else if (section === 'history') {
+        alert('历史记录功能开发中...');
+      }
+    }
+
+    // ===== Initialize on load =====
+    init();
+  </script>
+</body>
+</html>

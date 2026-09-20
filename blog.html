@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术博客 - ICPC/CCPC 算法训练站</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#087f7b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="blog.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="blog-nav">
+        <div class="blog-nav-inner">
+            <a href="index.html" class="blog-nav-brand" data-transition="index.html" onclick="if(typeof window.navigateWithTransition==='function'){event.preventDefault();window.navigateWithTransition('index.html');}">← 返回训练站</a>
+            <span class="blog-nav-title">🚀 Yebai.Space 技术专栏</span>
+            <div class="blog-nav-actions">
+                <button id="themeToggle" class="blog-btn-sm">🌓 切换模式</button>
+                <div id="authArea"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="blog-modal">
+        <div class="blog-modal-backdrop"></div>
+        <div class="blog-modal-content">
+            <div class="blog-modal-header">
+                <h3>欢迎回家，请登录</h3>
+                <button class="blog-modal-close" onclick="closeModal('loginModal')">✕</button>
+            </div>
+            <div class="blog-modal-body">
+                <label>用户名</label>
+                <input id="loginUser" type="text" placeholder="请输入用户名">
+                <label>密码</label>
+                <input id="loginPass" type="password" placeholder="请输入密码">
+                <p id="loginErr" class="blog-error"></p>
+                <button class="blog-btn-primary" onclick="doLogin()">立即登录</button>
+                <p class="blog-text-center">没有账号？<a href="#" onclick="switchToRegister()">点击注册</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div id="registerModal" class="blog-modal">
+        <div class="blog-modal-backdrop"></div>
+        <div class="blog-modal-content">
+            <div class="blog-modal-header">
+                <h3>🎉 注册新账号</h3>
+                <button class="blog-modal-close" onclick="closeModal('registerModal')">✕</button>
+            </div>
+            <div class="blog-modal-body">
+                <label>用户名</label>
+                <input id="regUser" type="text" placeholder="请设置用户名">
+                <label>邮箱</label>
+                <input id="regEmail" type="email" placeholder="请输入邮箱">
+                <label>密码</label>
+                <input id="regPass" type="password" placeholder="请设置密码(至少6位)">
+                <p id="regErr" class="blog-error"></p>
+                <button class="blog-btn-primary green" onclick="doRegister()">马上注册</button>
+                <p class="blog-text-center">已有账号？<a href="#" onclick="switchToLogin()">点击登录</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div id="deleteModal" class="blog-modal">
+        <div class="blog-modal-backdrop"></div>
+        <div class="blog-modal-content" style="max-width:400px;">
+            <div class="blog-modal-body" style="text-align:center;padding:32px;">
+                <div style="font-size:2.5rem;margin-bottom:12px;">⚠️</div>
+                <h3>确认要删除文章吗？</h3>
+                <p style="color:var(--muted);font-size:0.88rem;margin-bottom:20px;">此操作不可恢复，文章和评论将全部删除！</p>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                    <button class="blog-btn-sm" onclick="closeModal('deleteModal')">算了吧</button>
+                    <button class="blog-btn-danger" id="confirmDeleteBtn">决意删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 主视图区域 ========== -->
+
+    <!-- 首页/文章列表 -->
+    <div id="viewHome" class="blog-container">
+        <!-- 用户侧边抽屉 -->
+        <div id="userDrawer" class="blog-drawer">
+            <div class="blog-drawer-header">
+                <div class="blog-drawer-avatar" id="drawerAvatar"></div>
+                <div>
+                    <div class="blog-drawer-name" id="drawerName"></div>
+                    <div class="blog-drawer-sub">欢迎回到极客空间</div>
+                </div>
+                <button class="blog-drawer-close" onclick="closeDrawer()">✕</button>
+            </div>
+            <div class="blog-drawer-body">
+                <a class="blog-drawer-item" onclick="showView('viewEditor');openEditor();">
+                    <span>🚀</span><div><div>发布新技术推文</div><small>分享你的最新极客见解</small></div>
+                </a>
+                <a class="blog-drawer-item" onclick="showNotifications();">
+                    <span>📩</span><div><div>互动消息中心 <span id="drawerBadge" class="blog-badge" style="display:none;"></span></div><small>捕获全新的读者评论与点赞</small></div>
+                </a>
+                <a class="blog-drawer-item" onclick="showMessages();">
+                    <span>💬</span><div><div>我的私信 <span id="msgBadge" class="blog-badge" style="display:none;"></span></div><small>与关注的人私密交流</small></div>
+                </a>
+                <a class="blog-drawer-item" onclick="showDrafts();">
+                    <span>💾</span><div><div>我的独立草稿箱</div><small>保存未完待续的灵感</small></div>
+                </a>
+                <a class="blog-drawer-item" onclick="showMyProfile();">
+                    <span>🌐</span><div><div>我的个人社交主页</div><small>看自己斩获的总赞数和粉丝</small></div>
+                </a>
+                <a class="blog-drawer-item" onclick="showSettings();">
+                    <span>⚙️</span><div><div>账号配置中心</div><small>修改昵称、更换炫酷头像</small></div>
+                </a>
+                <div class="blog-drawer-divider"></div>
+                <button class="blog-btn-outline-danger" onclick="doLogout()">🔒 安全退出登录</button>
+            </div>
+        </div>
+
+        <div class="blog-search-box">
+            <span class="blog-search-icon">🔍</span>
+            <input id="searchInput" type="text" placeholder="输入关键字，探索极客的技术宇宙..." oninput="renderPostList()">
+        </div>
+        <div id="postGrid" class="blog-grid"></div>
+    </div>
+
+    <!-- 文章详情 -->
+    <div id="viewDetail" class="blog-container" style="display:none;">
+        <div id="detailContent"></div>
+    </div>
+
+    <!-- 编辑器 -->
+    <div id="viewEditor" class="blog-container" style="display:none;">
+        <div class="blog-editor-wrap">
+            <div class="blog-editor-header">
+                <h2 id="editorTitle">🚀 记录极客灵感</h2>
+                <span class="blog-editor-mode">Workspace / Creative</span>
+            </div>
+            <div class="blog-editor-row">
+                <div style="flex:2;">
+                    <label>文章标题</label>
+                    <input id="edTitle" type="text" placeholder="好名字能引来更多极客围观...">
+                </div>
+                <div style="flex:1;">
+                    <label>分类标签</label>
+                    <input id="edTags" type="text" placeholder="如: Python,Django,架构">
+                </div>
+            </div>
+            <div class="blog-toolbar">
+                <button onclick="edInsert('**','**')" title="加粗"><b>B</b></button>
+                <button onclick="edInsert('*','*')" title="斜体"><i>I</i></button>
+                <button onclick="edInsert('~~','~~')" title="删除线"><s>S</s></button>
+                <span class="blog-toolbar-div"></span>
+                <button onclick="edInsert('# ','\n')" title="H1">H₁</button>
+                <button onclick="edInsert('## ','\n')" title="H2">H₂</button>
+                <button onclick="edInsert('### ','\n')" title="H3">H₃</button>
+                <span class="blog-toolbar-div"></span>
+                <button onclick="edInsert('> ','\n')" title="引用">❝</button>
+                <button onclick="edInsert('\n---\n','')" title="分割线">―</button>
+                <button onclick="edInsert('`','`')" title="行内代码">`</button>
+                <button onclick="edInsert('\n```\n','\n```\n')" title="代码块">&lt;/&gt;</button>
+                <span class="blog-toolbar-div"></span>
+                <button onclick="edInsert('- ','\n')" title="列表">•</button>
+                <button onclick="edInsert('1. ','\n')" title="有序列表">1.</button>
+                <button onclick="edInsert('[链接文字](',')')" title="链接">🔗</button>
+                <button onclick="edInsert('\n| 表头1 | 表头2 |\n| --- | --- |\n| 内容1 | 内容2 |\n','')" title="表格">▦</button>
+                <button class="blog-toolbar-split" onclick="toggleSplit()">◫</button>
+            </div>
+            <div class="blog-editor-workspace">
+                <textarea id="edContent" placeholder="用技术连接世界，写下你的洞察..." oninput="updatePreview()"></textarea>
+                <div id="previewPanel" class="blog-preview" style="display:none;">
+                    <div class="blog-preview-label">📊 实时渲染舱 (LIVE PREVIEW)</div>
+                    <div id="previewOutput"></div>
+                </div>
+            </div>
+            <div class="blog-editor-actions">
+                <button class="blog-btn-primary" onclick="publishPost()">🚀 马上公开发布</button>
+                <button class="blog-btn-outline" onclick="saveDraft()">💾 存为草稿</button>
+                <button class="blog-btn-outline" onclick="showView('viewHome');renderPostList();">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 草稿箱 -->
+    <div id="viewDrafts" class="blog-container" style="display:none;">
+        <div class="blog-page-header">
+            <h2>💾 我的草稿箱 <span id="draftCount" class="blog-count-badge">0</span></h2>
+            <button class="blog-btn-sm" onclick="showView('viewHome');renderPostList();">🔙 返回首页</button>
+        </div>
+        <div id="draftList"></div>
+    </div>
+
+    <!-- 个人设置 -->
+    <div id="viewSettings" class="blog-container" style="display:none;">
+        <div style="max-width:600px;margin:0 auto;">
+            <a class="blog-btn-sm" onclick="showView('viewHome');renderPostList();" style="margin-bottom:20px;">🔙 返回首页</a>
+            <div class="blog-card" style="padding:32px;">
+                <h2 style="text-align:center;margin-bottom:24px;">⚙️ 个人设置</h2>
+                <div class="blog-stat-row">
+                    <div class="blog-stat-box"><div class="blog-stat-num" id="setLikes">0</div><div class="blog-stat-label">收获总赞</div></div>
+                    <div class="blog-stat-box"><div class="blog-stat-num" id="setPosts">0</div><div class="blog-stat-label">已发推文</div></div>
+                </div>
+                <label>用户名</label>
+                <input id="setUser" type="text">
+                <label>邮箱</label>
+                <input id="setEmail" type="email">
+                <button class="blog-btn-primary" onclick="saveSettings()" style="margin-top:12px;">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 作者主页 -->
+    <div id="viewAuthor" class="blog-container" style="display:none;">
+        <div style="max-width:650px;margin:0 auto;">
+            <button class="blog-back-btn" onclick="showView('viewHome');renderPostList();">← 返回</button>
+            <div id="authorContent"></div>
+        </div>
+    </div>
+
+    <!-- 通知中心 -->
+    <div id="viewNotify" class="blog-container" style="display:none;">
+        <div style="max-width:650px;margin:0 auto;">
+            <div class="blog-page-header">
+                <h2>📩 通知中心</h2>
+                <button class="blog-btn-sm" onclick="showView('viewHome');renderPostList();">返回首页</button>
+            </div>
+            <div id="notifyList"></div>
+        </div>
+    </div>
+
+    <!-- 私信界面 -->
+    <div id="viewMessages" class="blog-container" style="display:none;">
+        <div class="msg-layout">
+            <!-- 左侧：对话列表 -->
+            <div class="msg-sidebar" id="msgSidebar">
+                <div class="msg-sidebar-header">
+                    <h3>💬 私信</h3>
+                    <button class="blog-btn-sm" onclick="showView('viewHome');renderPostList();">返回</button>
+                </div>
+                <div id="msgConvList" class="msg-conv-list"></div>
+            </div>
+            <!-- 右侧：聊天窗口 -->
+            <div class="msg-chat" id="msgChatArea">
+                <div class="msg-chat-header" id="msgChatHeader">
+                    <span style="color:var(--blog-meta);font-weight:400;">选择一个对话开始聊天</span>
+                </div>
+                <div class="msg-chat-messages" id="msgChatMessages">
+                    <div class="msg-empty-chat">
+                        <div>
+                            <div style="font-size:3rem;margin-bottom:12px;">💬</div>
+                            <div>选择左侧的对话，或从用户主页发起私信</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="msg-chat-input-area" id="msgChatInputArea" style="display:none;">
+                    <div class="msg-toolbar">
+                        <button class="msg-tool-btn" onclick="msgPickFile()" title="发送文件">📎</button>
+                        <button class="msg-tool-btn" onclick="msgPickImage()" title="发送图片">🖼️</button>
+                        <button class="msg-tool-btn" onclick="msgToggleEmoji()" title="表情">😊</button>
+                    </div>
+                    <div id="msgEmojiPanel" class="msg-emoji-panel"></div>
+                    <div class="msg-input-row">
+                        <textarea id="msgInput" placeholder="输入消息..." rows="1"></textarea>
+                        <button class="blog-btn-primary" onclick="msgSend()" style="min-height:38px;">发送</button>
+                    </div>
+                    <input type="file" id="msgFileInput" style="display:none;" onchange="msgHandleFile(event)">
+                    <input type="file" id="msgImageInput" accept="image/*" style="display:none;" onchange="msgHandleImage(event)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="blog.js"></script>
+    <script src="transition.js"></script>
+    <script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+</script>
+</body>
+</html>

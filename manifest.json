@@ -1,0 +1,17 @@
+{
+  "name": "AlgoForge - 竞赛算法训练平台",
+  "short_name": "AlgoForge",
+  "description": "ICPC/CCPC 竞赛算法从0到区域赛的系统化训练平台",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050508",
+  "theme_color": "#087f7b",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

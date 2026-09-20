@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlgoForge - 学习</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#087f7b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Ensure learn page content is visible */
+    #learnPage { min-height: 100vh; background: var(--bg); }
+    .learn-workspace { display: grid !important; grid-template-columns: 280px 1fr !important; gap: 18px; margin-top: 18px; }
+    .lesson-panel { background: var(--surface) !important; border: 1px solid var(--line) !important; border-radius: var(--radius) !important; box-shadow: var(--shadow) !important; padding: 20px !important; }
+    .lesson-list { display: grid; gap: 8px; margin-top: 14px; }
+    .lesson-item { width: 100%; min-height: 62px; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px; color: var(--ink); background: var(--surface-soft); border: 1px solid transparent; border-radius: var(--radius); text-align: left; cursor: pointer; }
+    .lesson-item:hover, .lesson-item.active { border-color: var(--teal); background: var(--teal-soft); }
+    .lesson-item.done .lesson-index { color: #fff; background: var(--green); }
+    .lesson-index { width: 34px; height: 34px; display: inline-grid; place-items: center; color: var(--teal); background: #fff; border: 1px solid var(--line); border-radius: 50%; font-weight: 900; }
+    .lesson-name { display: block; overflow: hidden; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+    .lesson-time { display: block; margin-top: 2px; color: var(--muted); font-size: 0.82rem; }
+    .lesson-exercise-count { min-width: 40px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; color: var(--teal); background: var(--teal-soft); border: 1px solid #b7dfdc; border-radius: 999px; font-size: 0.78rem; font-weight: 900; white-space: nowrap; }
+    .lesson-item.active .lesson-exercise-count { color: #fff; background: var(--teal); border-color: var(--teal); }
+    .lesson-category-header { padding: 8px 10px 4px; color: var(--teal); font-weight: 900; font-size: 0.82rem; letter-spacing: 0.5px; text-transform: uppercase; border-top: 1px solid var(--line); margin-top: 6px; }
+    .lesson-category-header:first-child { border-top: none; margin-top: 0; }
+    .lesson-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 18px; }
+    .lesson-summary > div, .topic-section { padding: 14px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius); }
+    .lesson-summary p { margin: 8px 0 0; color: var(--muted); line-height: 1.7; }
+    .lesson-body { margin-top: 18px; color: #303840; line-height: 1.8; }
+    .lesson-body ul { padding-left: 20px; }
+    .lesson-body li + li { margin-top: 8px; }
+    .topic-section + .topic-section { margin-top: 12px; }
+    .topic-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .topic-chip { display: inline-flex; align-items: center; min-height: 30px; padding: 5px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 850; color: #0d5f5b; background: var(--teal-soft); border: 1px solid #b7dfdc; }
+    .example-block { padding: 14px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: var(--radius); }
+    .example-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .example-title { font-weight: 850; }
+    .example-source { color: var(--teal); font-size: 0.82rem; font-weight: 850; }
+    .example-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; color: var(--teal); background: var(--teal-soft); border: 1px solid #b7dfdc; border-radius: 999px; font-size: 0.82rem; font-weight: 850; text-decoration: none; margin-top: 8px; }
+    .example-link:hover { background: #c8e8e5; border-color: var(--teal); }
+    /* Steps section */
+    .steps-section { background: linear-gradient(135deg, #f0fdf9, #ecfeff) !important; border-color: #99f6e4 !important; }
+    .steps-section h3 { color: #0d5f5b; margin-bottom: 16px; font-size: 1.05rem; }
+    .steps-list { display: flex; flex-direction: column; gap: 14px; }
+    .step-item { display: flex; gap: 14px; align-items: flex-start; }
+    .step-num {
+      flex-shrink: 0; width: 32px; height: 32px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #087f7b, #0a9e99);
+      color: #fff; border-radius: 10px;
+      font-weight: 900; font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(8,127,123,0.25);
+    }
+    .step-text {
+      flex: 1; color: #303840; line-height: 1.8;
+      font-size: 0.92rem; padding-top: 4px;
+    }
+    .label { margin: 0; color: var(--teal); font-size: 0.75rem; font-weight: 800; letter-spacing: 0; text-transform: uppercase; }
+    .section-kicker { margin: 0; color: var(--teal); font-size: 0.75rem; font-weight: 800; letter-spacing: 0; text-transform: uppercase; }
+    .app-shell { width: min(1480px, 100%); margin: 0 auto; padding: 18px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 106px; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .brand-block { min-width: 0; }
+    .back-button { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; margin-bottom: 10px; color: var(--teal); background: var(--teal-soft); border: 1px solid #b7dfdc; border-radius: 6px; font-weight: 850; font-size: 0.85rem; cursor: pointer; }
+    .back-button:hover { background: #c8e8e5; border-color: var(--teal); }
+    .progress-box { min-width: 210px; display: grid; gap: 8px; color: var(--muted); font-weight: 800; text-align: right; }
+    .progress-track { width: 100%; height: 10px; overflow: hidden; background: #e7edf2; border-radius: 999px; }
+    .progress-track span { display: block; width: 0; height: 100%; background: linear-gradient(90deg, var(--teal), var(--green)); border-radius: inherit; transition: width 220ms ease; }
+    .subtitle { max-width: 660px; margin-bottom: 0; color: var(--muted); line-height: 1.6; }
+    .lesson-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .code-lab { margin-top: 18px; border: 1px solid #26323d; border-radius: var(--radius); overflow: hidden; background: #151b22; }
+    .code-title { padding: 12px 14px; color: #dbe7ef; border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between; }
+    pre { margin: 0; min-height: 190px; max-height: 340px; overflow: auto; padding: 16px; }
+    code { color: #e6edf3; font-family: "Cascadia Code", Consolas, monospace; font-size: 0.9rem; line-height: 1.65; }
+    .primary-button { color: #fff; background: var(--teal); min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; border: 1px solid transparent; border-radius: 6px; font-weight: 900; cursor: pointer; }
+    .primary-button:hover { background: #056c69; }
+    .ghost-button { color: var(--ink); background: var(--surface-soft); border: 1px solid var(--line); border-radius: 6px; min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; font-weight: 900; cursor: pointer; }
+    .ghost-button:hover { background: #eef6f5; border-color: var(--teal); }
+    .button-icon { display: inline-grid; min-width: 1em; place-items: center; line-height: 1; }
+    .ai-chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 999; }
+    .ai-chat-toggle { width: 56px; height: 56px; border-radius: 50%; background: var(--teal); color: #fff; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 14px rgba(8, 127, 123, 0.3); }
+    .ai-chat-window { position: fixed; bottom: 100px; right: 30px; width: 360px; max-height: 500px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; }
+    .ai-chat-window.hidden { display: none; }
+    .ai-chat-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--teal); color: #fff; border-radius: var(--radius) var(--radius) 0 0; }
+    .ai-chat-header h3 { margin: 0; font-size: 0.95rem; }
+    .ai-close-btn { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; }
+    .ai-chat-messages { flex: 1; overflow-y: auto; padding: 14px; min-height: 200px; max-height: 300px; }
+    .ai-message { margin-bottom: 10px; }
+    .ai-message.user .ai-message-content { background: var(--teal-soft); margin-left: 30px; }
+    .ai-message.bot .ai-message-content { background: var(--surface-soft); margin-right: 30px; }
+    .ai-message-content { padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; line-height: 1.6; }
+    .ai-message-content p { margin: 0; }
+    .ai-chat-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px; }
+    .ai-suggestion-btn { padding: 5px 10px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: 999px; font-size: 0.78rem; cursor: pointer; }
+    .ai-suggestion-btn:hover { background: var(--teal-soft); border-color: var(--teal); }
+    .ai-chat-input-area { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line); }
+    .ai-chat-input-area input { flex: 1; min-height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; font-size: 0.85rem; }
+    .ai-chat-input-area button { padding: 0 14px; background: var(--teal); color: #fff; border: none; border-radius: 6px; font-weight: 850; cursor: pointer; }
+    @media (max-width: 960px) {
+      .learn-workspace { grid-template-columns: 1fr !important; }
+      .lesson-summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hidden stubs for script.js -->
+  <div id="landingPage" class="page-hidden"></div>
+  <div id="practicePage" class="page-hidden">
+    <button id="btnBackFromPractice" class="page-hidden"></button>
+    <button id="tabVisual" class="page-hidden"></button>
+    <button id="tabQuiz" class="page-hidden"></button>
+    <button id="tabProblems" class="page-hidden"></button>
+    <div id="visualArea" class="page-hidden"></div>
+    <div id="quizArea" class="page-hidden"></div>
+    <div id="problemArea" class="page-hidden"></div>
+    <select id="algorithmSelect" class="page-hidden"></select>
+    <div id="arrayCanvas" class="page-hidden"></div>
+    <canvas id="graphCanvas" class="page-hidden"></canvas>
+    <div id="visualTitle" class="page-hidden"></div>
+    <div id="timeBadge" class="page-hidden"></div>
+    <div id="spaceBadge" class="page-hidden"></div>
+    <div id="visualNarration" class="page-hidden"></div>
+    <button id="prevStepBtn" class="page-hidden"></button>
+    <button id="playBtn" class="page-hidden"></button>
+    <button id="nextStepBtn" class="page-hidden"></button>
+    <button id="shuffleBtn" class="page-hidden"></button>
+    <input id="targetInput" class="page-hidden" />
+    <input id="speedInput" class="page-hidden" />
+    <div id="quizQuestion" class="page-hidden"></div>
+    <div id="answerList" class="page-hidden"></div>
+    <div id="quizFeedback" class="page-hidden"></div>
+    <div id="quizScore" class="page-hidden"></div>
+    <button id="nextQuestionBtn" class="page-hidden"></button>
+    <select id="problemCategoryFilter" class="page-hidden"></select>
+    <select id="problemDifficultyFilter" class="page-hidden"></select>
+    <input id="problemSearchInput" class="page-hidden" />
+    <div id="problemList" class="page-hidden"></div>
+    <div id="problemCount" class="page-hidden"></div>
+    <div id="totalProblemCount" class="page-hidden"></div>
+    <div id="problemModal" class="page-hidden"><div class="modal-backdrop"></div></div>
+    <div id="modalTitle" class="page-hidden"></div>
+    <div id="problemDescription" class="page-hidden"></div>
+    <div id="problemSamples" class="page-hidden"></div>
+    <button id="modalCloseBtn" class="page-hidden"></button>
+    <canvas id="fireworksCanvas" class="page-hidden"></canvas>
+    <button id="tabCode" class="page-hidden"></button>
+    <div id="codeArea" class="page-hidden"></div>
+    <textarea id="codeEditor" class="page-hidden"></textarea>
+    <textarea id="codeInput" class="page-hidden"></textarea>
+    <pre id="codeOutput" class="page-hidden"></pre>
+    <div id="codeStatus" class="page-hidden"></div>
+    <button id="runCodeBtn" class="page-hidden"></button>
+    <button id="clearCodeBtn" class="page-hidden"></button>
+    <button id="resetCodeBtn" class="page-hidden"></button>
+  </div>
+  <div id="blogPage" class="page-hidden"></div>
+  <button id="btnGoLearn" class="page-hidden"></button>
+  <button id="btnGoPractice" class="page-hidden"></button>
+
+  <!-- Learn Page -->
+  <div id="learnPage">
+    <div class="app-shell">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="brand-block">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <button class="back-button" id="btnBackFromLearn">← 返回首页</button>
+            <button class="back-button" id="themeToggleLearn">🌓 切换主题</button>
+            <button class="back-button" id="pathToggleBtn" style="background:var(--teal-soft);color:var(--teal);">🗺️ 学习路径</button>
+          </div>
+          <h1>算法学习</h1>
+          <p class="subtitle">系统化学习竞赛算法，从入门到区域赛</p>
+        </div>
+        <div class="global-search">
+          <input type="text" id="globalSearchLearn" placeholder="🔍 搜索课程、题目..." oninput="handleGlobalSearch(this.value,'searchResultsLearn')">
+          <div id="searchResultsLearn" class="search-results" style="display:none;"></div>
+        </div>
+        <div class="progress-box">
+          <span id="progressText">0 / 0</span>
+          <div class="progress-track"><span id="progressFill"></span></div>
+        </div>
+      </div>
+
+      <!-- Path View -->
+      <div id="pathView" style="display:none;margin-top:18px;">
+        <div class="practice-panel" style="padding:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h2>🗺️ 学习路径图</h2>
+            <button class="ghost-button" id="pathCloseBtn">关闭路径图</button>
+          </div>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">箭头表示学习顺序依赖，点击节点跳转到该课程。颜色表示掌握状态。</p>
+          <canvas id="pathCanvas" style="width:100%;height:600px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);cursor:grab;"></canvas>
+          <div style="display:flex;gap:16px;margin-top:12px;font-size:0.82rem;color:var(--muted);">
+            <span>🟢 已掌握</span><span>🔵 当前选中</span><span>⚪ 未学习</span><span>🟡 前置未完成</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Learn Workspace -->
+      <div class="learn-workspace">
+        <!-- Sidebar -->
+        <div class="lesson-panel" style="position:sticky;top:18px;max-height:calc(100vh - 36px);overflow:auto;">
+          <div class="lesson-toolbar">
+            <h2>课程列表</h2>
+          </div>
+          <div class="lesson-list" id="lessonList"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="lesson-panel">
+          <div class="lesson-toolbar">
+            <span class="label" id="lessonNumber"></span>
+            <h2 id="lessonTitle"></h2>
+          </div>
+          <div class="lesson-summary">
+            <div>
+              <h3>🎯 学习目标</h3>
+              <p id="lessonGoal"></p>
+            </div>
+            <div>
+              <h3>✅ 掌握标准</h3>
+              <p id="lessonCheck"></p>
+            </div>
+          </div>
+          <div class="lesson-body" id="lessonBody"></div>
+          <div class="code-lab">
+            <div class="code-title">
+              <span class="section-kicker">代码模板</span>
+              <button class="ghost-button" id="copyCodeBtn"><span class="button-icon">⧉</span> 复制</button>
+            </div>
+            <pre><code id="lessonCode"></code></pre>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
+            <button class="primary-button" id="completeLessonBtn"><span class="button-icon">✓</span> 标记掌握</button>
+            <button class="ghost-button" id="resetProgressBtn">重置进度</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Chat -->
+  <div class="ai-chat-widget">
+    <button class="ai-chat-toggle" id="aiChatToggle">🤖</button>
+    <div class="ai-chat-window hidden" id="aiChatWindow">
+      <div class="ai-chat-header">
+        <h3>AI 算法助手</h3>
+        <button class="ai-close-btn" id="aiChatClose">✕</button>
+      </div>
+      <div class="ai-chat-messages" id="aiChatMessages"></div>
+      <div class="ai-chat-suggestions">
+        <button class="ai-suggestion-btn" data-question="动态规划">DP</button>
+        <button class="ai-suggestion-btn" data-question="Dijkstra">最短路</button>
+        <button class="ai-suggestion-btn" data-question="二分图匹配">匹配</button>
+        <button class="ai-suggestion-btn" data-question="树链剖分">树链</button>
+      </div>
+      <div class="ai-chat-input-area">
+        <input type="text" id="aiChatInput" placeholder="输入问题..." />
+        <button id="aiChatSend">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="solutions.js"></script>
+  <script src="script.js"></script>
+  <script src="transition.js"></script>
+  <script>
+    document.getElementById('btnBackFromLearn').addEventListener('click', function(e) {
+      e.stopImmediatePropagation();
+      if (typeof window.navigateWithTransition === 'function') {
+        window.navigateWithTransition('index.html');
+      } else {
+        window.location.href = 'index.html';
+      }
+    }, true);
+  </script>
+  <script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+</script>
+</body>
+</html>

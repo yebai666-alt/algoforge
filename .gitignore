@@ -1,0 +1,27 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude Code / agent authoring files
+.claude/
+.agents/
+_docx_work/
+agents/
+tools/
+scenarios/
+prompt.md
+TEST_REPORT.md
+
+# Django backend (my/) — not part of the static site
+my/
+*.sqlite3
+__pycache__/
+*.pyc
+venv/
+
+# React app (app/) — separate dev app
+app/
+
+# Node
+node_modules/

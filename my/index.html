@@ -22,68 +22,134 @@
       --coral: #d85f45;
       --gold: #b17a00;
       --green: #2b8c56;
+      --green-soft: #e5f6ec;
       --shadow: 0 18px 50px rgba(28, 42, 54, 0.12);
       --radius: 8px;
       font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
     }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0a0f14;
+      --surface: #121a22;
+      --surface-soft: #18222c;
+      --ink: #e6edf3;
+      --muted: #93a1ad;
+      --line: #26323d;
+      --teal: #3fb5ae;
+      --teal-soft: #12353a;
+      --coral: #e8846b;
+      --gold: #d9a13c;
+      --green: #4caf79;
+      --green-soft: #14352a;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+    }
     * { box-sizing: border-box; }
     body {
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(238,243,247,0.96)), var(--bg);
+      margin: 0; min-height: 100vh;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(238,243,247,0.9)), var(--bg);
       color: var(--ink);
     }
+    :root[data-theme="dark"] body {
+      background: linear-gradient(180deg, #0f171f, var(--bg));
+    }
+    a { color: var(--teal); }
     .app-shell { width: min(1120px, 100%); margin: 0 auto; padding: 18px; }
 
+    /* Topbar */
     .topbar {
       display: flex; align-items: center; justify-content: space-between; gap: 18px;
-      min-height: 106px; padding: 20px;
+      min-height: 92px; padding: 20px;
       background: var(--surface); border: 1px solid var(--line);
       border-radius: var(--radius); box-shadow: var(--shadow);
     }
     .brand-block { min-width: 0; }
     .back-button {
-      display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px;
       margin-bottom: 10px; color: var(--teal); background: var(--teal-soft);
       border: 1px solid #b7dfdc; border-radius: 6px; font-weight: 850;
-      font-size: 0.85rem; cursor: pointer; text-decoration: none;
-      transition: all 220ms ease;
+      font-size: 0.85rem; cursor: pointer; text-decoration: none; transition: all 220ms ease;
     }
     .back-button:hover { background: #c8e8e5; border-color: var(--teal); }
-    h1 { margin: 0 0 6px; font-size: 1.6rem; }
-    .subtitle { margin: 0; color: var(--muted); line-height: 1.6; max-width: 660px; }
-    .badge {
-      display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
-      color: var(--gold); background: #fff6df; border: 1px solid #f0ddb0;
-      border-radius: 999px; font-size: 0.8rem; font-weight: 850; white-space: nowrap;
+    h1 { margin: 0 0 4px; font-size: 1.5rem; }
+    .subtitle { margin: 0; color: var(--muted); line-height: 1.6; }
+    .user-chip {
+      display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px;
+      background: var(--surface-soft); border: 1px solid var(--line); border-radius: 999px;
+      white-space: nowrap; font-weight: 700; font-size: 0.85rem;
+    }
+    .avatar {
+      width: 30px; height: 30px; flex-shrink: 0; display: inline-grid; place-items: center;
+      color: #fff; background: linear-gradient(135deg, #087f7b, #0a9e99);
+      border-radius: 50%; font-weight: 900; font-size: 0.9rem;
     }
 
-    .notice {
-      margin-top: 18px; padding: 20px 22px;
-      background: var(--surface); border: 1px solid var(--line);
-      border-left: 4px solid var(--teal); border-radius: var(--radius);
-      box-shadow: var(--shadow);
+    /* Stat cards */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px; margin-top: 18px;
     }
-    .notice h2 { margin: 0 0 10px; font-size: 1.15rem; }
-    .notice p { margin: 0 0 8px; color: var(--muted); line-height: 1.8; }
-    .notice p:last-child { margin-bottom: 0; }
-
-    .feature-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px; margin-top: 18px;
-    }
-    .feature-card {
-      padding: 20px; background: var(--surface); border: 1px solid var(--line);
+    .stat-card {
+      padding: 18px; background: var(--surface); border: 1px solid var(--line);
       border-radius: var(--radius); box-shadow: var(--shadow);
     }
-    .feature-icon { font-size: 1.6rem; }
-    .feature-card h3 { margin: 12px 0 6px; font-size: 1rem; }
-    .feature-card p { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
-    .feature-tag {
-      display: inline-block; margin-top: 12px; padding: 4px 10px;
-      color: var(--muted); background: var(--surface-soft); border: 1px solid var(--line);
-      border-radius: 999px; font-size: 0.75rem; font-weight: 850;
+    .stat-label { margin: 0; color: var(--muted); font-size: 0.78rem; font-weight: 800; }
+    .stat-value { margin: 8px 0 0; font-size: 1.6rem; font-weight: 900; }
+    .stat-note { margin: 4px 0 0; color: var(--muted); font-size: 0.8rem; }
+    .stat-value.teal { color: var(--teal); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.coral { color: var(--coral); }
+    .stat-value.gold { color: var(--gold); }
+
+    /* Panels */
+    .panel {
+      margin-top: 18px; padding: 20px 22px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
     }
+    .panel h2 { margin: 0 0 14px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+    /* Progress bar */
+    .bar-track { height: 12px; overflow: hidden; background: #e7edf2; border-radius: 999px; }
+    :root[data-theme="dark"] .bar-track { background: #1d2935; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--green)); border-radius: inherit; transition: width 400ms ease; }
+
+    /* Category list */
+    .cat-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); }
+    .cat-row:last-child { border-bottom: none; }
+    .cat-name { flex-shrink: 0; min-width: 120px; font-weight: 800; font-size: 0.9rem; }
+    .cat-bar { flex: 1; height: 9px; background: #e7edf2; border-radius: 999px; overflow: hidden; }
+    :root[data-theme="dark"] .cat-bar { background: #1d2935; }
+    .cat-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--green)); border-radius: inherit; }
+    .cat-count { flex-shrink: 0; color: var(--muted); font-size: 0.82rem; min-width: 52px; text-align: right; }
+
+    /* Two-column layout */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+    @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* Error book */
+    .error-item {
+      padding: 12px 14px; margin-bottom: 10px; background: var(--surface-soft);
+      border: 1px solid var(--line); border-left: 3px solid var(--coral); border-radius: 6px;
+    }
+    .error-q { font-weight: 700; margin-bottom: 6px; }
+    .error-a { color: var(--muted); font-size: 0.85rem; line-height: 1.6; }
+    .error-explain { margin-top: 6px; color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
+
+    /* Streak calendar */
+    .cal { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; }
+    .cal-day {
+      aspect-ratio: 1; border-radius: 3px; background: var(--surface-soft);
+      border: 1px solid var(--line);
+    }
+    .cal-day.lv1 { background: #b7e3d8; border-color: #8ed0c2; }
+    .cal-day.lv2 { background: #79cdbb; border-color: #55b8a4; }
+    .cal-day.lv3 { background: #3fb09c; border-color: #2f9a86; }
+    .cal-day.lv4 { background: #0e8b78; border-color: #0a7a68; }
+    :root[data-theme="dark"] .cal-day { background: #18222c; border-color: #26323d; }
+    .streak-stats { margin-top: 14px; display: flex; gap: 18px; flex-wrap: wrap; color: var(--muted); font-size: 0.85rem; }
+
+    .empty { color: var(--muted); padding: 10px 0; font-size: 0.9rem; }
 
     .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
     .primary-button {
@@ -109,59 +175,254 @@
       <div class="brand-block">
         <a class="back-button" href="../index.html">← 返回首页</a>
         <h1>我的</h1>
-        <p class="subtitle">个人中心 · 学习进度与收藏</p>
+        <p class="subtitle">个人中心 · 学习进度 / 测试成绩 / 错题本 / 打卡</p>
       </div>
-      <span class="badge">🚧 静态占位页</span>
+      <div class="user-chip" id="userChip"></div>
     </div>
 
-    <!-- Notice -->
-    <div class="notice">
-      <h2>👤 这个页面暂时是占位页</h2>
-      <p>
-        原「我的」页面依赖一个独立的 Django 后端（账号登录、进度同步、博客管理），
-        因为服务器到期已经下线。现在网站迁移到了 GitHub Pages，只能托管静态文件，
-        所以这里暂时用占位页代替。
-      </p>
-      <p>
-        你仍然可以正常使用「学习」「练习」「考试」「博客」等核心功能——
-        学习进度会保存在<strong>你自己的浏览器</strong>里（localStorage），换设备或清缓存后不会同步。
-      </p>
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <p class="stat-label">📚 掌握课程</p>
+        <p class="stat-value teal" id="statLessons">-</p>
+        <p class="stat-note" id="statLessonsNote"></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">🧪 测试正确率</p>
+        <p class="stat-value green" id="statQuiz">-</p>
+        <p class="stat-note" id="statQuizNote"></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">📕 错题本</p>
+        <p class="stat-value coral" id="statErrors">-</p>
+        <p class="stat-note" id="statErrorsNote"></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">🔥 连续打卡</p>
+        <p class="stat-value gold" id="statStreak">-</p>
+        <p class="stat-note" id="statStreakNote"></p>
+      </div>
     </div>
 
-    <!-- Feature preview -->
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">📈</div>
-        <h3>学习进度</h3>
-        <p>查看已掌握的知识点与学习路径，进度保存在本地浏览器中。</p>
-        <span class="feature-tag">本地可用</span>
+    <!-- Learning progress by category -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>🗂️ 学习进度（按分类）</h2>
+        <span style="color:var(--muted);font-size:0.85rem;" id="progressTotal"></span>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">⭐</div>
-        <h3>收藏题目</h3>
-        <p>收藏经典算法题，随时回顾。收藏记录保存在本地浏览器中。</p>
-        <span class="feature-tag">本地可用</span>
+      <div id="categoryList"></div>
+    </div>
+
+    <!-- Two-column: error book + streak -->
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>📕 错题本</h2>
+          <button class="ghost-button" id="clearErrorBtn" style="min-height:34px;padding:0 12px;font-size:0.82rem;">🗑 清空</button>
+        </div>
+        <div id="errorList"></div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">📝</div>
-        <h3>我的博客</h3>
-        <p>原后端提供的个人博客发布与管理功能，迁移后暂不可用。</p>
-        <span class="feature-tag">暂不可用</span>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>🔥 学习打卡</h2>
+          <span style="color:var(--muted);font-size:0.82rem;">最近 70 天</span>
+        </div>
+        <div class="cal" id="calGrid"></div>
+        <div class="streak-stats" id="streakStats"></div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔐</div>
-        <h3>账号与同步</h3>
-        <p>登录、云端同步等功能需要后端支持，静态托管下暂不可用。</p>
-        <span class="feature-tag">暂不可用</span>
+    </div>
+
+    <!-- My blog -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>📝 我的博客</h2>
+        <a class="ghost-button" href="../blog.html" style="min-height:34px;padding:0 12px;font-size:0.82rem;">去写博客 →</a>
       </div>
+      <div id="blogSummary"></div>
+    </div>
+
+    <!-- Local-only notice -->
+    <div class="empty" style="margin-top:18px;font-size:0.82rem;">
+      💡 以上数据全部保存在<strong>你自己的浏览器</strong>里（localStorage），不会上传到服务器。换设备、换浏览器或清除缓存后数据不会同步。
     </div>
 
     <!-- Actions -->
     <div class="actions">
-      <a class="primary-button" href="../practice.html">→ 去练习</a>
-      <a class="ghost-button" href="../learn.html">📚 去学习</a>
-      <a class="ghost-button" href="../blog.html">📝 看博客</a>
+      <a class="primary-button" href="../learn.html">📚 继续学习</a>
+      <a class="ghost-button" href="../practice.html">🧪 去练习 / 刷题</a>
+      <a class="ghost-button" href="../index.html">🏠 返回首页</a>
     </div>
   </div>
+
+  <script src="../data.js"></script>
+  <script>
+  (function () {
+    // ---- theme ----
+    try {
+      var theme = localStorage.getItem('blogTheme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {}
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function load(key, fallback) {
+      try { var v = JSON.parse(localStorage.getItem(key) || 'null'); return v == null ? fallback : v; }
+      catch (e) { return fallback; }
+    }
+    // ---- current user ----
+    var user = load('blogCurrentUser', null);
+    var username = user && user.username ? user.username : null;
+
+    function keyFor(prefix, legacy) {
+      return username ? (prefix + '_' + username) : legacy;
+    }
+
+    // ---- read data (globals are `const` in ../data.js, so not attached to window) ----
+    var _lessons = (typeof lessons !== 'undefined') ? lessons : [];
+    var _quizzes = (typeof quizzes !== 'undefined') ? quizzes : [];
+
+    // progress: merge legacy + per-user (site writes to per-user when logged in, legacy otherwise)
+    var completedIdx = {};
+    try {
+      (JSON.parse(localStorage.getItem('algorithmProgress') || '[]') || []).forEach(function (i) { completedIdx[i] = 1; });
+    } catch (e) {}
+    try {
+      (JSON.parse(localStorage.getItem('algo_progress_' + username) || '[]') || []).forEach(function (i) { completedIdx[i] = 1; });
+    } catch (e) {}
+
+    var quizStats = load(keyFor('algo_quiz', 'algoQuiz'), null);
+    var errorBook = load(keyFor('algo_errorbook', 'algoErrorbook'), []);
+    var streakData = load(keyFor('algo_streak', 'algoStreak'), {});
+    var posts = load('blogPosts', []);
+
+    // ---- user chip ----
+    var chip = document.getElementById('userChip');
+    if (username) {
+      chip.innerHTML = '<span class="avatar">' + esc(username.substring(0, 1).toUpperCase()) + '</span>' +
+        '<span>@' + esc(username) + '</span>';
+    } else {
+      chip.innerHTML = '<span>未登录</span>';
+    }
+
+    // ---- lesson stats ----
+    var completedCount = Object.keys(completedIdx).filter(function (i) { return i >= 0 && i < _lessons.length; }).length;
+    var totalLessons = _lessons.length;
+    document.getElementById('statLessons').textContent = totalLessons ? (completedCount + ' / ' + totalLessons) : '—';
+    document.getElementById('statLessonsNote').textContent = totalLessons
+      ? Math.round(completedCount / totalLessons * 100) + '% 已完成'
+      : '暂无课程数据';
+
+    // ---- quiz stats ----
+    var qCorrect = (quizStats && quizStats.correctAnswers) || 0;
+    var qAnswered = (quizStats && Array.isArray(quizStats.answeredQuestions)) ? quizStats.answeredQuestions.length : 0;
+    var acc = qAnswered ? Math.round(qCorrect / qAnswered * 100) : null;
+    document.getElementById('statQuiz').textContent = (acc === null) ? '—' : (acc + '%');
+    document.getElementById('statQuizNote').textContent = qAnswered ? ('答对 ' + qCorrect + ' / ' + qAnswered + ' 题') : '还没有答题记录';
+
+    // ---- error book stats ----
+    document.getElementById('statErrors').textContent = errorBook.length || '0';
+    document.getElementById('statErrorsNote').textContent = errorBook.length ? '做错的题都在这里' : '太棒了，没有错题 🎉';
+
+    // ---- streak stats ----
+    var streakKeys = Object.keys(streakData || {}).filter(function (d) { return streakData[d] > 0; });
+    var todayKey = new Date().toISOString().slice(0, 10);
+    function dayKey(offset) { var d = new Date(); d.setDate(d.getDate() - offset); return d.toISOString().slice(0, 10); }
+    var currentStreak = 0;
+    for (var s = 0; s < 365; s++) { if (streakData[dayKey(s)]) currentStreak++; else break; }
+    var sorted = streakKeys.slice().sort();
+    var longest = 0, temp = 0;
+    sorted.forEach(function (d, i) {
+      if (i === 0) temp = 1;
+      else {
+        var diff = (new Date(sorted[i]) - new Date(sorted[i - 1])) / 86400000;
+        temp = diff === 1 ? temp + 1 : 1;
+      }
+      if (temp > longest) longest = temp;
+    });
+    document.getElementById('statStreak').textContent = currentStreak + ' 天';
+    document.getElementById('statStreakNote').textContent = '最长 ' + longest + ' 天 · 累计 ' + streakKeys.length + ' 天';
+
+    // ---- category breakdown ----
+    var catList = document.getElementById('categoryList');
+    var cats = {};
+    _lessons.forEach(function (l, i) {
+      var c = l.category || '未分类';
+      if (!cats[c]) cats[c] = { total: 0, done: 0 };
+      cats[c].total++;
+      if (completedIdx[i]) cats[c].done++;
+    });
+    document.getElementById('progressTotal').textContent = completedCount + ' / ' + totalLessons + ' 课已掌握';
+    var catNames = Object.keys(cats);
+    if (!catNames.length) {
+      catList.innerHTML = '<div class="empty">暂无课程数据</div>';
+    } else {
+      var ch = '';
+      catNames.forEach(function (c) {
+        var d = cats[c];
+        var pct = d.total ? Math.round(d.done / d.total * 100) : 0;
+        ch += '<div class="cat-row">' +
+          '<span class="cat-name">' + esc(c) + '</span>' +
+          '<div class="cat-bar"><div class="cat-fill" style="width:' + pct + '%"></div></div>' +
+          '<span class="cat-count">' + d.done + '/' + d.total + '</span>' +
+          '</div>';
+      });
+      catList.innerHTML = ch;
+    }
+
+    // ---- error book list ----
+    var errArea = document.getElementById('errorList');
+    if (!errorBook.length) {
+      errArea.innerHTML = '<div class="empty">错题本是空的，太棒了！🎉</div>';
+    } else {
+      var eh = '';
+      var show = errorBook.slice(0, 20);
+      show.forEach(function (item) {
+        var correctTxt = item.answers && item.answers[item.correct] ? item.answers[item.correct] : '';
+        eh += '<div class="error-item">' +
+          '<div class="error-q">' + esc(item.question) + '</div>' +
+          '<div class="error-a">✅ 正确答案：' + esc(correctTxt) + '</div>' +
+          (item.explain ? '<div class="error-explain">' + esc(item.explain) + '</div>' : '') +
+          '</div>';
+      });
+      if (errorBook.length > 20) eh += '<div class="empty">…还有 ' + (errorBook.length - 20) + ' 道错题</div>';
+      errArea.innerHTML = eh;
+    }
+    document.getElementById('clearErrorBtn').addEventListener('click', function () {
+      if (!confirm('确定清空错题本吗？')) return;
+      try { localStorage.setItem(keyFor('algo_errorbook', 'algoErrorbook'), '[]'); } catch (e) {}
+      location.reload();
+    });
+
+    // ---- streak calendar ----
+    var grid = document.getElementById('calGrid');
+    var gh = '';
+    for (var i = 69; i >= 0; i--) {
+      var k = dayKey(i);
+      var c = streakData[k] || 0;
+      var lv = 0;
+      if (c >= 4) lv = 4; else if (c >= 3) lv = 3; else if (c >= 2) lv = 2; else if (c >= 1) lv = 1;
+      gh += '<div class="cal-day' + (lv ? ' lv' + lv : '') + '" title="' + k + '：' + c + ' 次"></div>';
+    }
+    grid.innerHTML = gh;
+    document.getElementById('streakStats').innerHTML =
+      '<span>🔥 当前连续 <strong>' + currentStreak + '</strong> 天</span>' +
+      '<span>🏆 最长连续 <strong>' + longest + '</strong> 天</span>' +
+      '<span>📅 累计活跃 <strong>' + streakKeys.length + '</strong> 天</span>';
+
+    // ---- blog summary ----
+    var blogArea = document.getElementById('blogSummary');
+    if (username) {
+      var mine = posts.filter(function (p) { return p.author === username; });
+      var pub = mine.filter(function (p) { return p.status !== 'draft'; }).length;
+      var draft = mine.filter(function (p) { return p.status === 'draft'; }).length;
+      blogArea.innerHTML = '<div class="empty">@' + esc(username) + ' 共 <strong>' + mine.length + '</strong> 篇文章（已发布 ' + pub + ' · 草稿 ' + draft + '）。博客数据保存在本地浏览器。</div>';
+    } else {
+      blogArea.innerHTML = '<div class="empty">还没有登录。去博客页 <a href="../blog.html">注册 / 登录</a> 后，可以写文章、点赞、评论、关注。</div>';
+    }
+  })();
+  </script>
 </body>
 </html>

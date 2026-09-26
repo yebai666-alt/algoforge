@@ -13,8 +13,9 @@ scenarios/
 prompt.md
 TEST_REPORT.md
 
-# Django backend (my/) — not part of the static site
-my/
+# Django backend (my/) — not part of the static site (except the static placeholder page)
+my/*
+!my/index.html
 *.sqlite3
 __pycache__/
 *.pyc

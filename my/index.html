@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AlgoForge - 我的</title>
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#087f7b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef3f7;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --ink: #20262d;
+      --muted: #5d6874;
+      --line: #d7e0e8;
+      --teal: #087f7b;
+      --teal-soft: #dff3f1;
+      --coral: #d85f45;
+      --gold: #b17a00;
+      --green: #2b8c56;
+      --shadow: 0 18px 50px rgba(28, 42, 54, 0.12);
+      --radius: 8px;
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(238,243,247,0.96)), var(--bg);
+      color: var(--ink);
+    }
+    .app-shell { width: min(1120px, 100%); margin: 0 auto; padding: 18px; }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      min-height: 106px; padding: 20px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .brand-block { min-width: 0; }
+    .back-button {
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+      margin-bottom: 10px; color: var(--teal); background: var(--teal-soft);
+      border: 1px solid #b7dfdc; border-radius: 6px; font-weight: 850;
+      font-size: 0.85rem; cursor: pointer; text-decoration: none;
+      transition: all 220ms ease;
+    }
+    .back-button:hover { background: #c8e8e5; border-color: var(--teal); }
+    h1 { margin: 0 0 6px; font-size: 1.6rem; }
+    .subtitle { margin: 0; color: var(--muted); line-height: 1.6; max-width: 660px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+      color: var(--gold); background: #fff6df; border: 1px solid #f0ddb0;
+      border-radius: 999px; font-size: 0.8rem; font-weight: 850; white-space: nowrap;
+    }
+
+    .notice {
+      margin-top: 18px; padding: 20px 22px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-left: 4px solid var(--teal); border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .notice h2 { margin: 0 0 10px; font-size: 1.15rem; }
+    .notice p { margin: 0 0 8px; color: var(--muted); line-height: 1.8; }
+    .notice p:last-child { margin-bottom: 0; }
+
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px; margin-top: 18px;
+    }
+    .feature-card {
+      padding: 20px; background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .feature-icon { font-size: 1.6rem; }
+    .feature-card h3 { margin: 12px 0 6px; font-size: 1rem; }
+    .feature-card p { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
+    .feature-tag {
+      display: inline-block; margin-top: 12px; padding: 4px 10px;
+      color: var(--muted); background: var(--surface-soft); border: 1px solid var(--line);
+      border-radius: 999px; font-size: 0.75rem; font-weight: 850;
+    }
+
+    .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    .primary-button {
+      color: #fff; background: var(--teal); min-height: 44px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 0 18px; border: 1px solid transparent; border-radius: 6px;
+      font-weight: 900; font-size: 0.95rem; cursor: pointer; text-decoration: none;
+    }
+    .primary-button:hover { background: #056c69; }
+    .ghost-button {
+      color: var(--ink); background: var(--surface-soft); border: 1px solid var(--line);
+      border-radius: 6px; min-height: 44px; display: inline-flex; align-items: center;
+      justify-content: center; gap: 8px; padding: 0 18px;
+      font-weight: 900; font-size: 0.95rem; cursor: pointer; text-decoration: none;
+    }
+    .ghost-button:hover { background: #eef6f5; border-color: var(--teal); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="brand-block">
+        <a class="back-button" href="../index.html">← 返回首页</a>
+        <h1>我的</h1>
+        <p class="subtitle">个人中心 · 学习进度与收藏</p>
+      </div>
+      <span class="badge">🚧 静态占位页</span>
+    </div>
+
+    <!-- Notice -->
+    <div class="notice">
+      <h2>👤 这个页面暂时是占位页</h2>
+      <p>
+        原「我的」页面依赖一个独立的 Django 后端（账号登录、进度同步、博客管理），
+        因为服务器到期已经下线。现在网站迁移到了 GitHub Pages，只能托管静态文件，
+        所以这里暂时用占位页代替。
+      </p>
+      <p>
+        你仍然可以正常使用「学习」「练习」「考试」「博客」等核心功能——
+        学习进度会保存在<strong>你自己的浏览器</strong>里（localStorage），换设备或清缓存后不会同步。
+      </p>
+    </div>
+
+    <!-- Feature preview -->
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <h3>学习进度</h3>
+        <p>查看已掌握的知识点与学习路径，进度保存在本地浏览器中。</p>
+        <span class="feature-tag">本地可用</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⭐</div>
+        <h3>收藏题目</h3>
+        <p>收藏经典算法题，随时回顾。收藏记录保存在本地浏览器中。</p>
+        <span class="feature-tag">本地可用</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>我的博客</h3>
+        <p>原后端提供的个人博客发布与管理功能，迁移后暂不可用。</p>
+        <span class="feature-tag">暂不可用</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>账号与同步</h3>
+        <p>登录、云端同步等功能需要后端支持，静态托管下暂不可用。</p>
+        <span class="feature-tag">暂不可用</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a class="primary-button" href="../practice.html">→ 去练习</a>
+      <a class="ghost-button" href="../learn.html">📚 去学习</a>
+      <a class="ghost-button" href="../blog.html">📝 看博客</a>
+    </div>
+  </div>
+</body>
+</html>

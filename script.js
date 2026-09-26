@@ -5812,8 +5812,14 @@ const quizzes = [{"question":"n=1e5且每组1秒，最稳妥的复杂度是？",
 
 
 const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
+function loadCompletedLessons(){
+  const cu=JSON.parse(localStorage.getItem('blogCurrentUser')||'null');
+  const key=(cu&&cu.username)?('algo_progress_'+cu.username):'algorithmProgress';
+  try{ return JSON.parse(localStorage.getItem(key)||'[]').filter(id=>id>=0&&id<lessons.length); }
+  catch(e){ return []; }
+}
 const state = {
-  lessonIndex:0, completed:new Set(JSON.parse(localStorage.getItem('algorithmProgress')||'[]').filter(id=>id>=0&&id<lessons.length)),
+  lessonIndex:0, completed:new Set(loadCompletedLessons()),
   algorithm:'binary', values:[5,12,19,27,35,46,58,73], target:35, steps:[], stepIndex:0, playing:false, timer:null,
   quizIndex:0, correctAnswers:0, answeredQuestions:new Set(), problemCategory:'全部', problemDifficulty:'全部', problemSearch:''
 };
